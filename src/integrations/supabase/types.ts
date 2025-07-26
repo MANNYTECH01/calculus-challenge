@@ -14,7 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      device_sessions: {
+        Row: {
+          created_at: string
+          device_fingerprint: string
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          session_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          session_token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          session_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          difficulty_level: string | null
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question_text: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          difficulty_level?: string | null
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question_text: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          difficulty_level?: string | null
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          question_text?: string
+        }
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          anti_cheat_violations: Json | null
+          device_fingerprint: string | null
+          id: string
+          ip_address: string | null
+          quiz_data: Json | null
+          score: number
+          submitted_at: string
+          time_taken: number
+          total_questions: number
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          anti_cheat_violations?: Json | null
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: string | null
+          quiz_data?: Json | null
+          score?: number
+          submitted_at?: string
+          time_taken: number
+          total_questions?: number
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          anti_cheat_violations?: Json | null
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: string | null
+          quiz_data?: Json | null
+          score?: number
+          submitted_at?: string
+          time_taken?: number
+          total_questions?: number
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
