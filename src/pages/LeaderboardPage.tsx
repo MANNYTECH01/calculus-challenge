@@ -33,7 +33,7 @@ const LeaderboardPage: React.FC = () => {
             time_taken,
             submitted_at,
             user_id,
-            profiles!inner(username)
+            profiles(username)
           `)
           .order('score', { ascending: false })
           .order('time_taken', { ascending: true })
