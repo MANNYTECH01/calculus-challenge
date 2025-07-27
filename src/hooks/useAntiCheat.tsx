@@ -36,7 +36,7 @@ export const useAntiCheat = ({
 
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
-      addViolation("Right-click attempted");
+      addViolation("Right-click attempted - Screenshots during the quiz will be detected and will result in disqualification");
     };
 
     document.addEventListener('contextmenu', handleContextMenu);
@@ -121,14 +121,14 @@ export const useAntiCheat = ({
         // Add blur overlay temporarily
         const overlay = document.createElement('div');
         overlay.className = 'quiz-overlay';
-        overlay.textContent = 'Screenshots are not allowed!';
+        overlay.textContent = 'Screenshots during the quiz will be detected and will result in disqualification!';
         document.body.appendChild(overlay);
         
         setTimeout(() => {
           document.body.removeChild(overlay);
         }, 2000);
         
-        addViolation("Screenshot attempt");
+        addViolation("Screenshot attempt - Will result in disqualification");
       }
     };
 

@@ -1,233 +1,321 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Lock, User } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2, CreditCard, CheckCircle } from 'lucide-react';
 
 const AuthPage: React.FC = () => {
-  const { signIn, signUp, user, loading } = useAuth();
+  const { user, signIn, signUp, loading } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentVerified, setPaymentVerified] = useState(false);
 
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
-  });
-
-  const [signupData, setSignupData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    username: ''
-  });
+  // Form states
+  const [signInForm, setSignInForm] = useState({ email: '', password: '' });
+  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', username: '', confirmPassword: '' });
 
   useEffect(() => {
-    if (user && !loading) {
-      navigate('/');
+    if (user) {
+      // Check payment status
+      const paymentStatus = searchParams.get('payment');
+      if (paymentStatus === 'success') {
+        handlePaymentVerification();
+      } else {
+        navigate('/');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, navigate, searchParams]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handlePaymentVerification = async () => {
+    if (!user?.email) return;
     
-    await signIn(loginData.email, loginData.password);
-    setIsLoading(false);
+    try {
+      setPaymentProcessing(true);
+      
+      // Get the session ID from URL params or storage
+      const sessionId = searchParams.get('session_id') || localStorage.getItem('payment_session_id');
+      
+      if (sessionId) {
+        const { data, error } = await supabase.functions.invoke('verify-payment', {
+          body: { session_id: sessionId, email: user.email }
+        });
+
+        if (error) throw error;
+
+        if (data.verified) {
+          setPaymentVerified(true);
+          localStorage.removeItem('payment_session_id');
+          toast({
+            title: "Payment Verified!",
+            description: "Your registration is now complete. You can take the quiz.",
+          });
+          setTimeout(() => navigate('/'), 2000);
+        } else {
+          toast({
+            title: "Payment Verification Failed",
+            description: "Your payment could not be verified. Please contact support.",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      toast({
+        title: "Verification Error",
+        description: "Failed to verify payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPaymentProcessing(false);
+    }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const { error } = await signIn(signInForm.email, signInForm.password);
+      if (!error) {
+        toast({
+          title: "Welcome back!",
+          description: "You have been successfully signed in.",
+        });
+      }
+    } catch (error) {
+      console.error('Sign in error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (signupData.password !== signupData.confirmPassword) {
-      alert('Passwords do not match');
+    if (signUpForm.password !== signUpForm.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Please ensure both passwords match.",
+        variant: "destructive",
+      });
       return;
     }
 
-    if (signupData.password.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
+    setIsSubmitting(true);
+    
+    try {
+      const { error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.username);
+      if (!error) {
+        // Initiate payment process
+        await handlePaymentInitiation();
+      }
+    } catch (error) {
+      console.error('Sign up error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    setIsLoading(true);
-    await signUp(signupData.email, signupData.password, signupData.username);
-    setIsLoading(false);
+  const handlePaymentInitiation = async () => {
+    try {
+      setPaymentProcessing(true);
+      
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: { email: signUpForm.email }
+      });
+
+      if (error) throw error;
+
+      if (data.url) {
+        // Store session info for verification
+        localStorage.setItem('payment_session_id', data.session_id);
+        
+        // Redirect to Stripe checkout
+        window.open(data.url, '_blank');
+        
+        toast({
+          title: "Redirecting to Payment",
+          description: "Complete your ₦1000 registration fee to proceed.",
+        });
+      }
+    } catch (error) {
+      console.error('Payment initiation error:', error);
+      toast({
+        title: "Payment Error",
+        description: "Failed to initiate payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPaymentProcessing(false);
+    }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (paymentProcessing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <CreditCard className="h-12 w-12 mx-auto text-primary" />
+              <h3 className="text-xl font-semibold">Processing Payment</h3>
+              <p className="text-muted-foreground">Please wait while we verify your payment...</p>
+              <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (paymentVerified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <CheckCircle className="h-12 w-12 mx-auto text-success" />
+              <h3 className="text-xl font-semibold">Payment Verified!</h3>
+              <p className="text-muted-foreground">Your registration is complete. Redirecting to homepage...</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            MTH 102 Quiz
-          </h1>
-          <p className="text-muted-foreground">
-            Login or create an account to participate
+      <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-primary/20">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            MTH 102 Quiz Portal
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Registration requires ₦1000 payment
           </p>
-        </div>
-
-        <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-center">Authentication</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login" className="space-y-4">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        className="pl-10"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                        required
-                      />
-                    </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up & Pay</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="signin">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signin-email">Email</Label>
+                  <Input
+                    id="signin-email"
+                    type="email"
+                    value={signInForm.email}
+                    onChange={(e) => setSignInForm(prev => ({ ...prev, email: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signin-password">Password</Label>
+                  <Input
+                    id="signin-password"
+                    type="password"
+                    value={signInForm.password}
+                    onChange={(e) => setSignInForm(prev => ({ ...prev, password: e.target.value }))}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Sign In
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-username">Username</Label>
+                  <Input
+                    id="signup-username"
+                    type="text"
+                    value={signUpForm.username}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, username: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    value={signUpForm.email}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, email: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    value={signUpForm.password}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, password: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm">Confirm Password</Label>
+                  <Input
+                    id="signup-confirm"
+                    type="password"
+                    value={signUpForm.confirmPassword}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    required
+                  />
+                </div>
+                
+                <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
+                  <div className="text-sm text-warning font-semibold mb-1">
+                    Registration Fee: ₦1000
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="login-password"
-                        type="password"
-                        placeholder="Enter your password"
-                        className="pl-10"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                      />
-                    </div>
+                  <div className="text-xs text-muted-foreground">
+                    After creating your account, you'll be redirected to pay the registration fee via Stripe.
                   </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Signing In...' : 'Sign In'}
-                  </Button>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signup" className="space-y-4">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-username">Username</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-username"
-                        type="text"
-                        placeholder="Choose a username"
-                        className="pl-10"
-                        value={signupData.username}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, username: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        className="pl-10"
-                        value={signupData.email}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="Create a password (min 6 chars)"
-                        className="pl-10"
-                        value={signupData.password}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm">Confirm Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-confirm"
-                        type="password"
-                        placeholder="Confirm your password"
-                        className="pl-10"
-                        value={signupData.confirmPassword}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Creating Account...' : 'Create Account'}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        <div className="text-center text-sm text-muted-foreground">
-          <p>By proceeding, you agree to follow all quiz rules and regulations.</p>
-        </div>
-      </div>
+                </div>
+                
+                <Button type="submit" className="w-full" disabled={isSubmitting || paymentProcessing}>
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Sign Up & Pay ₦1000
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="mt-6 text-center">
+            <Button variant="outline" onClick={() => navigate('/')}>
+              Back to Home
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

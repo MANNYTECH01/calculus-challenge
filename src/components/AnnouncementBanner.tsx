@@ -5,7 +5,10 @@ const AnnouncementBanner: React.FC = () => {
   return (
     <Card className="prize-glow bg-gradient-to-r from-warning/20 to-accent/20 border-warning/30 p-6 text-center">
       <div className="text-lg md:text-xl font-bold text-warning mb-2">
-        🔥 Top 3 scorers will receive a cash giveaway! 🔥
+        🎓 MTH 102 Calculus Quiz Competition | August 9th, 2025 | Registration: ₦1000
+      </div>
+      <div className="text-sm md:text-base text-muted-foreground mb-4">
+        Quiz Time: 12:00 AM - 11:59 PM | Winner Announced: August 10th at 7:00 AM
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
         <div className="flex items-center justify-center space-x-2">

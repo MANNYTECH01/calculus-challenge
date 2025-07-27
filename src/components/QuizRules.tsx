@@ -4,13 +4,17 @@ import { CheckCircle } from 'lucide-react';
 
 const QuizRules: React.FC = () => {
   const rules = [
-    "Quiz duration: 20 minutes",
-    "Multiple choice questions from Calculus (MTH 102)",
+    "Quiz duration: 40 minutes",
+    "40 multiple choice questions from Calculus (MTH 102)",
+    "Registration fee: ₦1000 (required before taking quiz)",
+    "Quiz available: August 9th, 2025 (12:00 AM - 11:59 PM)",
     "No pausing or restarting once started",
     "Tab switching will auto-submit your quiz",
-    "Screenshots and copying are disabled",
+    "Screenshots during the quiz will be detected and will result in disqualification",
+    "Copying is disabled",
     "One attempt per student",
-    "Top 3 scores win cash prizes"
+    "Top 10 scores displayed on public leaderboard",
+    "Winner announced August 10th, 2025 at 7:00 AM"
   ];
 
   return (
@@ -31,8 +35,8 @@ const QuizRules: React.FC = () => {
         </div>
         <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
           <p className="text-sm text-muted-foreground">
-            <strong>Subject Focus:</strong> Calculus (MTH 102) - Derivatives, Integrals, Limits, 
-            Chain Rule, Product Rule, Quotient Rule, and fundamental theorems.
+            <strong>Subject Focus:</strong> Calculus (MTH 102) - Functions, Limits, 
+            Differentiation, Integration, and Fundamental Theorems.
           </p>
         </div>
       </CardContent>

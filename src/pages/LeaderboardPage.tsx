@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Trophy, Medal, Award, Clock, Target, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Trophy, Medal, Award, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LeaderboardEntry {
   id: string;
@@ -11,6 +13,7 @@ interface LeaderboardEntry {
   total_questions: number;
   time_taken: number;
   submitted_at: string;
+  user_id: string;
   profiles: {
     username: string;
   };
@@ -18,11 +21,12 @@ interface LeaderboardEntry {
 
 const LeaderboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadLeaderboard = async () => {
+    const fetchLeaderboard = async () => {
       try {
         const { data, error } = await supabase
           .from('quiz_attempts')
@@ -33,32 +37,37 @@ const LeaderboardPage: React.FC = () => {
             time_taken,
             submitted_at,
             user_id,
-            profiles(username)
+            profiles!inner(username)
           `)
           .order('score', { ascending: false })
           .order('time_taken', { ascending: true })
           .limit(10);
 
         if (error) throw error;
-        setLeaderboard(data || []);
+
+        // Transform the data to match LeaderboardEntry interface
+        const transformedData = data?.map((attempt: any) => ({
+          id: attempt.id,
+          score: attempt.score,
+          total_questions: attempt.total_questions,
+          time_taken: attempt.time_taken,
+          submitted_at: attempt.submitted_at,
+          user_id: attempt.user_id,
+          profiles: {
+            username: attempt.profiles?.username || 'Anonymous'
+          }
+        })) || [];
+
+        setLeaderboard(transformedData);
       } catch (error) {
-        console.error('Error loading leaderboard:', error);
+        console.error('Error fetching leaderboard:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadLeaderboard();
+    fetchLeaderboard();
   }, []);
-
-  const getMedalIcon = (position: number) => {
-    switch (position) {
-      case 1: return <Trophy className="h-6 w-6 medal-gold" />;
-      case 2: return <Medal className="h-6 w-6 medal-silver" />;
-      case 3: return <Award className="h-6 w-6 medal-bronze" />;
-      default: return <span className="w-6 text-center font-bold">{position}</span>;
-    }
-  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -66,84 +75,147 @@ const LeaderboardPage: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Leaderboard
-          </h1>
-          <Button variant="outline" onClick={() => navigate('/')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-        </div>
-      </header>
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
-      <main className="container mx-auto px-4 py-8">
-        <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold">
-              🏆 Top Performers
-            </CardTitle>
-            <p className="text-muted-foreground">
-              Congratulations to our quiz champions!
-            </p>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-4 text-muted-foreground">Loading leaderboard...</p>
-              </div>
-            ) : leaderboard.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No quiz attempts yet. Be the first to take the quiz!</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {leaderboard.map((entry, index) => {
-                  const position = index + 1;
-                  const percentage = ((entry.score / entry.total_questions) * 100).toFixed(1);
-                  
-                  return (
-                    <div
-                      key={entry.id}
-                      className={`flex items-center space-x-4 p-4 rounded-lg border ${
-                        position <= 3 
-                          ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30' 
-                          : 'bg-muted/20 border-muted'
-                      }`}
-                    >
-                      <div className="flex-shrink-0">
-                        {getMedalIcon(position)}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-foreground">
-                          {entry.profiles?.username || 'Anonymous'}
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return <Trophy className="h-6 w-6 text-yellow-500" />;
+      case 2:
+        return <Medal className="h-6 w-6 text-gray-400" />;
+      case 3:
+        return <Award className="h-6 w-6 text-amber-600" />;
+      default:
+        return <span className="text-lg font-bold text-muted-foreground">#{rank}</span>;
+    }
+  };
+
+  const getRankBadge = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black">1st Place</Badge>;
+      case 2:
+        return <Badge className="bg-gradient-to-r from-gray-300 to-gray-500 text-black">2nd Place</Badge>;
+      case 3:
+        return <Badge className="bg-gradient-to-r from-amber-400 to-amber-600 text-black">3rd Place</Badge>;
+      default:
+        return <Badge variant="outline">#{rank}</Badge>;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-8">
+      <div className="container mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+            🏆 Top 10 Leaderboard
+          </h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            MTH 102 Calculus Quiz Competition - August 9th, 2025
+            <br />
+            Winner will be announced on August 10th, 2025 at 7:00 AM
+          </p>
+        </div>
+
+        {/* Leaderboard */}
+        <div className="max-w-4xl mx-auto space-y-4">
+          {leaderboard.length === 0 ? (
+            <Card className="bg-card/50 backdrop-blur-sm">
+              <CardContent className="py-12">
+                <div className="text-center">
+                  <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">No Results Yet</h3>
+                  <p className="text-muted-foreground">
+                    Be the first to complete the quiz and claim the top spot!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            leaderboard.map((entry, index) => {
+              const rank = index + 1;
+              const percentage = Math.round((entry.score / entry.total_questions) * 100);
+              const isCurrentUser = user?.id === entry.user_id;
+
+              return (
+                <Card 
+                  key={entry.id} 
+                  className={`bg-card/50 backdrop-blur-sm transition-all hover:shadow-lg ${
+                    isCurrentUser ? 'ring-2 ring-primary' : ''
+                  } ${rank <= 3 ? 'border-primary/30' : ''}`}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
+                          {getRankIcon(rank)}
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(entry.submitted_at).toLocaleDateString()}
+                        <div>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className={`font-semibold ${isCurrentUser ? 'text-primary' : ''}`}>
+                              {entry.profiles.username}
+                              {isCurrentUser && <span className="text-sm text-primary ml-2">(You)</span>}
+                            </h3>
+                            {getRankBadge(rank)}
+                          </div>
+                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                            <div className="flex items-center space-x-1">
+                              <Target className="h-4 w-4" />
+                              <span>{entry.score}/{entry.total_questions} ({percentage}%)</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-4 w-4" />
+                              <span>{formatTime(entry.time_taken)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>{formatDate(entry.submitted_at)}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      
                       <div className="text-right">
-                        <div className="font-bold text-lg">
-                          {entry.score}/{entry.total_questions}
+                        <div className="text-2xl font-bold text-primary">
+                          {entry.score}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {percentage}% • {formatTime(entry.time_taken)}
+                          points
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+
+        {/* Navigation */}
+        <div className="text-center mt-8">
+          <Button onClick={() => navigate('/')} variant="outline">
+            Back to Home
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

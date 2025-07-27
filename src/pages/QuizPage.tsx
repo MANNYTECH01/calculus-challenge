@@ -30,7 +30,7 @@ const QuizPage: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
-  const [timeLeft, setTimeLeft] = useState(20 * 60); // 20 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(40 * 60); // 40 minutes in seconds
   const [isLoading, setIsLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,7 +78,7 @@ const QuizPage: React.FC = () => {
         };
       });
 
-      const timeTaken = (20 * 60) - timeLeft;
+      const timeTaken = (40 * 60) - timeLeft;
       
       // Submit to database
       const { error } = await supabase
@@ -135,7 +135,7 @@ const QuizPage: React.FC = () => {
         const { data, error } = await supabase
           .from('questions')
           .select('*')
-          .limit(20);
+          .limit(40);
 
         if (error) throw error;
 
@@ -256,7 +256,7 @@ const QuizPage: React.FC = () => {
                 <Clock className="h-6 w-6 text-primary" />
                 <div>
                   <div className="font-semibold">Duration</div>
-                  <div className="text-sm text-muted-foreground">20 minutes</div>
+                  <div className="text-sm text-muted-foreground">40 minutes</div>
                 </div>
               </div>
               <div className="flex items-center space-x-3 p-4 bg-accent/10 rounded-lg">
@@ -276,7 +276,8 @@ const QuizPage: React.FC = () => {
                   <ul className="text-sm space-y-1 text-muted-foreground">
                     <li>• Once started, you cannot pause or restart</li>
                     <li>• Tab switching will auto-submit your quiz</li>
-                    <li>• Screenshots and copying are disabled</li>
+                    <li>• Screenshots during the quiz will be detected and will result in disqualification</li>
+                    <li>• Copying is disabled</li>
                     <li>• You have only one attempt</li>
                   </ul>
                 </div>

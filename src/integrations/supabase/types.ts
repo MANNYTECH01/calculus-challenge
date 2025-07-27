@@ -44,11 +44,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_sessions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          id: string
+          status: string | null
+          stripe_session_id: string
+          updated_at: string
+          user_email: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          status?: string | null
+          stripe_session_id: string
+          updated_at?: string
+          user_email: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          status?: string | null
+          stripe_session_id?: string
+          updated_at?: string
+          user_email?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           full_name: string | null
           id: string
+          payment_verified: boolean | null
           updated_at: string
           user_id: string
           username: string
@@ -57,6 +91,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          payment_verified?: boolean | null
           updated_at?: string
           user_id: string
           username: string
@@ -65,6 +100,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          payment_verified?: boolean | null
           updated_at?: string
           user_id?: string
           username?: string
@@ -147,7 +183,15 @@ export type Database = {
           user_agent?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_quiz_attempts_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {
