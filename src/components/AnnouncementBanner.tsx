@@ -13,7 +13,7 @@ const AnnouncementBanner: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
         <div className="flex items-center justify-center space-x-2">
           <span className="medal-gold text-2xl">🥇</span>
-          <span className="font-semibold">First: ₦20,000</span>
+          <span className="font-semibold">First: ₦25,000</span>
         </div>
         <div className="flex items-center justify-center space-x-2">
           <span className="medal-silver text-2xl">🥈</span>
