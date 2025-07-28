@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -13,16 +12,11 @@ serve(async (req) => {
   }
 
   try {
-    const { session_id, email } = await req.json();
+    const { reference, email } = await req.json();
     
-    if (!session_id || !email) {
-      throw new Error("Session ID and email are required");
+    if (!reference || !email) {
+      throw new Error("Reference and email are required");
     }
-
-    // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
-    });
 
     // Create Supabase client with service role key
     const supabaseClient = createClient(
@@ -31,38 +25,55 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Retrieve the session from Stripe
-    const session = await stripe.checkout.sessions.retrieve(session_id);
-    
-    if (session.payment_status === 'paid') {
+    // Initialize Paystack
+    const paystackSecretKey = Deno.env.get("REACT_APP_PAYSTACK_SECRET_KEY");
+    if (!paystackSecretKey) {
+      throw new Error("Paystack secret key not configured");
+    }
+
+    // Verify the payment with Paystack
+    const verifyResponse = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${paystackSecretKey}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const verifyData = await verifyResponse.json();
+
+    if (verifyData.status && verifyData.data.status === "success") {
       // Update payment session status
       await supabaseClient
         .from("payment_sessions")
-        .update({ status: "paid" })
-        .eq("stripe_session_id", session_id);
+        .update({ status: "completed" })
+        .eq("paystack_reference", reference)
+        .eq("user_email", email);
 
-      // Update user profile to mark payment as verified
-      await supabaseClient
-        .from("profiles")
-        .update({ payment_verified: true })
-        .eq("user_id", (await supabaseClient.auth.getUserByClaim('email', email)).data.user?.id);
+      // Get user ID from email
+      const { data: userData } = await supabaseClient.auth.admin.getUserByEmail(email);
+      
+      if (userData.user) {
+        // Update user profile to mark payment as verified
+        await supabaseClient
+          .from("profiles")
+          .update({ payment_verified: true })
+          .eq("user_id", userData.user.id);
+      }
 
+      return new Response(JSON.stringify({ verified: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    } else {
       return new Response(JSON.stringify({ 
-        verified: true, 
-        payment_status: session.payment_status 
+        verified: false, 
+        reason: verifyData.message || "Payment not completed" 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
-
-    return new Response(JSON.stringify({ 
-      verified: false, 
-      payment_status: session.payment_status 
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
   } catch (error) {
     console.error('Payment verification error:', error);
     return new Response(JSON.stringify({ error: error.message }), {

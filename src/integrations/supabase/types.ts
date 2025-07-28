@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      answer_explanations: {
+        Row: {
+          created_at: string
+          explanation: string
+          explanation_math: string | null
+          id: string
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          explanation: string
+          explanation_math?: string | null
+          id?: string
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          explanation?: string
+          explanation_math?: string | null
+          id?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answer_explanations_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_sessions: {
         Row: {
           created_at: string
@@ -50,6 +82,8 @@ export type Database = {
           created_at: string
           currency: string | null
           id: string
+          paystack_access_code: string | null
+          paystack_reference: string | null
           status: string | null
           stripe_session_id: string
           updated_at: string
@@ -60,6 +94,8 @@ export type Database = {
           created_at?: string
           currency?: string | null
           id?: string
+          paystack_access_code?: string | null
+          paystack_reference?: string | null
           status?: string | null
           stripe_session_id: string
           updated_at?: string
@@ -70,10 +106,36 @@ export type Database = {
           created_at?: string
           currency?: string | null
           id?: string
+          paystack_access_code?: string | null
+          paystack_reference?: string | null
           status?: string | null
           stripe_session_id?: string
           updated_at?: string
           user_email?: string
+        }
+        Relationships: []
+      }
+      prize_structure: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          prize_amount: number
+          prize_description: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position: number
+          prize_amount: number
+          prize_description: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          prize_amount?: number
+          prize_description?: string
         }
         Relationships: []
       }
@@ -82,6 +144,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          location: string | null
           payment_verified: boolean | null
           updated_at: string
           user_id: string
@@ -91,6 +154,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          location?: string | null
           payment_verified?: boolean | null
           updated_at?: string
           user_id: string
@@ -100,6 +164,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          location?: string | null
           payment_verified?: boolean | null
           updated_at?: string
           user_id?: string
@@ -117,6 +182,7 @@ export type Database = {
           option_b: string
           option_c: string
           option_d: string
+          question_area: string | null
           question_text: string
         }
         Insert: {
@@ -128,6 +194,7 @@ export type Database = {
           option_b: string
           option_c: string
           option_d: string
+          question_area?: string | null
           question_text: string
         }
         Update: {
@@ -139,6 +206,7 @@ export type Database = {
           option_b?: string
           option_c?: string
           option_d?: string
+          question_area?: string | null
           question_text?: string
         }
         Relationships: []
@@ -156,6 +224,7 @@ export type Database = {
           total_questions: number
           user_agent: string | null
           user_id: string
+          user_location: string | null
         }
         Insert: {
           anti_cheat_violations?: Json | null
@@ -169,6 +238,7 @@ export type Database = {
           total_questions?: number
           user_agent?: string | null
           user_id: string
+          user_location?: string | null
         }
         Update: {
           anti_cheat_violations?: Json | null
@@ -182,6 +252,7 @@ export type Database = {
           total_questions?: number
           user_agent?: string | null
           user_id?: string
+          user_location?: string | null
         }
         Relationships: [
           {
@@ -192,6 +263,33 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      support_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin_response: boolean | null
+          message: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin_response?: boolean | null
+          message: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin_response?: boolean | null
+          message?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

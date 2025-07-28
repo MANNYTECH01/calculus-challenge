@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CountdownTimer from '@/components/CountdownTimer';
 import AnnouncementBanner from '@/components/AnnouncementBanner';
 import QuizRules from '@/components/QuizRules';
+import PrizeStructure from '@/components/PrizeStructure';
+import SupportChat from '@/components/SupportChat';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Users, Trophy, BookOpen } from 'lucide-react';
@@ -11,6 +13,7 @@ import { Calendar, Users, Trophy, BookOpen } from 'lucide-react';
 const HomePage: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [quizAvailable, setQuizAvailable] = useState(false);
 
   // Quiz date - set to a future date
   const quizDate = new Date('2025-08-09T00:00:00');
@@ -109,7 +112,7 @@ const HomePage: React.FC = () => {
           <Card className="text-center bg-gradient-to-br from-warning/10 to-primary/10 border-warning/20">
             <CardContent className="p-6">
               <Trophy className="h-8 w-8 mx-auto mb-2 text-warning" />
-              <div className="text-2xl font-bold text-foreground">₦45k</div>
+              <div className="text-2xl font-bold text-foreground">₦40k</div>
               <div className="text-sm text-muted-foreground">Total Prizes</div>
             </CardContent>
           </Card>
@@ -117,6 +120,9 @@ const HomePage: React.FC = () => {
 
         {/* Quiz Rules */}
         <QuizRules />
+
+        {/* Prize Structure */}
+        <PrizeStructure />
 
         {/* Action Buttons */}
         <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
@@ -126,8 +132,9 @@ const HomePage: React.FC = () => {
                 size="lg" 
                 className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white px-8 py-3 text-lg font-semibold"
                 onClick={handleStartQuiz}
+                disabled={!quizAvailable}
               >
-                Start Quiz
+                {quizAvailable ? 'Start Quiz' : 'Quiz Not Available Yet'}
               </Button>
               <Button 
                 variant="outline" 
@@ -140,14 +147,14 @@ const HomePage: React.FC = () => {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">
-                Please login to participate in the quiz
+                Register and pay ₦1000 to participate in the quiz
               </p>
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
                 onClick={() => navigate('/auth')}
               >
-                Login / Sign Up
+                Register & Pay ₦1000
               </Button>
             </div>
           )}
@@ -161,6 +168,9 @@ const HomePage: React.FC = () => {
           </p>
         </div>
       </footer>
+      
+      {/* Support Chat */}
+      <SupportChat />
     </div>
   );
 };

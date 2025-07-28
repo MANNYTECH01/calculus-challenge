@@ -4,17 +4,21 @@ import { CheckCircle } from 'lucide-react';
 
 const QuizRules: React.FC = () => {
   const rules = [
-    "Quiz duration: 40 minutes",
-    "40 multiple choice questions from Calculus (MTH 102)",
-    "Registration fee: ₦1000 (required before taking quiz)",
-    "Quiz available: August 9th, 2025 (12:00 AM - 11:59 PM)",
-    "No pausing or restarting once started",
-    "Tab switching will auto-submit your quiz",
-    "Screenshots during the quiz will be detected and will result in disqualification",
-    "Copying is disabled",
-    "One attempt per student",
-    "Top 10 scores displayed on public leaderboard",
-    "Winner announced August 10th, 2025 at 7:00 AM"
+    "Subject: Multiple Choice Questions from Calculus (MTH 102)",
+    "Registration Fee: ₦1000 (Required before taking quiz)",
+    "Quiz Date: August 9th, 2025 Available from: 12:00 AM – 11:59 PM",
+    "No Pausing or Restarting once the quiz is started",
+    "Tab Switching during the quiz will auto-submit your attempt",
+    "Screenshots will be detected; any attempt will result in disqualification",
+    "Copying/Right-clicking/Highlighting is disabled",
+    "One Attempt Only per student",
+    "Questions are Randomized per User – no user gets the same set of questions",
+    "Users from the same area will not get same questions",
+    "Countdown Timer: Users cannot start until the countdown ends at 12:00 AM on quiz day",
+    "Correct Answers & Explanations will be released on August 10th, 2025 at 7:00 AM",
+    "Winner Announcement: August 10th, 2025 at 7:00 AM",
+    "Registration remains open until 11:00 PM on August 9th, 2025",
+    "Real-time support chat available before, during, and after the quiz"
   ];
 
   return (

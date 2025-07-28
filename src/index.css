@@ -201,6 +201,17 @@
     text-shadow: 0 0 10px hsla(var(--bronze) / 0.5);
   }
 
+  /* KaTeX styles for math rendering */
+  .katex-display {
+    margin: 1rem 0;
+  }
+  
+  .katex {
+    font-size: 1.1em;
+  }
+    text-shadow: 0 0 10px hsla(var(--bronze) / 0.5);
+  }
+
   .fade-in-up {
     animation: fadeInUp 0.6s ease-out;
   }

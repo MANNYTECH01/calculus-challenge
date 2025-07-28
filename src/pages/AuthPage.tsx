@@ -40,19 +40,19 @@ const AuthPage: React.FC = () => {
     try {
       setPaymentProcessing(true);
       
-      // Get the session ID from URL params or storage
-      const sessionId = searchParams.get('session_id') || localStorage.getItem('payment_session_id');
+      // Get the reference from URL params or storage
+      const reference = searchParams.get('reference') || localStorage.getItem('payment_reference');
       
-      if (sessionId) {
+      if (reference) {
         const { data, error } = await supabase.functions.invoke('verify-payment', {
-          body: { session_id: sessionId, email: user.email }
+          body: { reference: reference, email: user.email }
         });
 
         if (error) throw error;
 
         if (data.verified) {
           setPaymentVerified(true);
-          localStorage.removeItem('payment_session_id');
+          localStorage.removeItem('payment_reference');
           toast({
             title: "Payment Verified!",
             description: "Your registration is now complete. You can take the quiz.",
@@ -129,21 +129,24 @@ const AuthPage: React.FC = () => {
       setPaymentProcessing(true);
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: { email: signUpForm.email }
+        body: { 
+          email: signUpForm.email,
+          location: 'default' // Can be enhanced with geolocation later
+        }
       });
 
       if (error) throw error;
 
       if (data.url) {
-        // Store session info for verification
-        localStorage.setItem('payment_session_id', data.session_id);
+        // Store reference for verification
+        localStorage.setItem('payment_reference', data.reference);
         
-        // Redirect to Stripe checkout
+        // Redirect to Paystack checkout
         window.open(data.url, '_blank');
         
         toast({
           title: "Redirecting to Payment",
-          description: "Complete your ₦1000 registration fee to proceed.",
+          description: "Complete your ₦1000 registration fee via Paystack to proceed.",
         });
       }
     } catch (error) {
@@ -297,7 +300,7 @@ const AuthPage: React.FC = () => {
                     Registration Fee: ₦1000
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    After creating your account, you'll be redirected to pay the registration fee via Stripe.
+                    After creating your account, you'll be redirected to pay the registration fee via Paystack (secure payment platform).
                   </div>
                 </div>
                 
