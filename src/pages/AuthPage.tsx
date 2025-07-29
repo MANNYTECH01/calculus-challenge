@@ -84,12 +84,7 @@ const AuthPage: React.FC = () => {
     
     try {
       const { error } = await signIn(signInForm.email, signInForm.password);
-      if (!error) {
-        toast({
-          title: "Welcome back!",
-          description: "You have been successfully signed in.",
-        });
-      }
+      // Don't show additional toast here - the useAuth hook handles it
     } catch (error) {
       console.error('Sign in error:', error);
     } finally {
@@ -114,7 +109,7 @@ const AuthPage: React.FC = () => {
     try {
       const { error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.username);
       if (!error) {
-        // Initiate payment process
+        // Initiate payment process immediately after successful sign up
         await handlePaymentInitiation();
       }
     } catch (error) {
