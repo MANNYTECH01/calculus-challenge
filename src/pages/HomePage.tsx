@@ -40,6 +40,9 @@ const HomePage: React.FC = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
+                <span className="text-sm text-muted-foreground">
+                  Welcome, <span className="font-semibold text-foreground">{user.user_metadata?.username || user.email}</span>
+                </span>
                 <Button variant="outline" onClick={handleViewDashboard}>
                   Dashboard
                 </Button>
@@ -112,7 +115,7 @@ const HomePage: React.FC = () => {
           <Card className="text-center bg-gradient-to-br from-warning/10 to-primary/10 border-warning/20">
             <CardContent className="p-6">
               <Trophy className="h-8 w-8 mx-auto mb-2 text-warning" />
-              <div className="text-2xl font-bold text-foreground">₦40k</div>
+              <div className="text-2xl font-bold text-foreground">₦50k</div>
               <div className="text-sm text-muted-foreground">Total Prizes</div>
             </CardContent>
           </Card>

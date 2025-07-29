@@ -141,7 +141,7 @@ const AuthPage: React.FC = () => {
         
         toast({
           title: "Redirecting to Payment",
-          description: "Complete your ₦1000 registration fee via Paystack to proceed.",
+          description: "Complete your ₦1000 registration fee via Paystack. After payment, check your email for confirmation link.",
         });
       }
     } catch (error) {
