@@ -10,7 +10,7 @@ const QuizRules: React.FC = () => {
     "Tab Switching during the quiz will auto-submit your attempt",
     "Screenshots will be detected; any attempt will result in disqualification",
     "Copying/Right-clicking/Highlighting is disabled",
-    "One Attempt Only per student",
+    "You have only one attempt",
     "Correct Answers & Explanations will be released on August 10th, 2025 at 7:00 AM",
     "Winner Announcement: August 10th, 2025 at 7:00 AM",
     "Leaderboard will be displayed on August 10th, 2025 at 1:00 AM",
