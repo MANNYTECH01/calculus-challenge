@@ -18,7 +18,9 @@ const QuizRules: React.FC = () => {
     "Correct Answers & Explanations will be released on August 10th, 2025 at 7:00 AM",
     "Winner Announcement: August 10th, 2025 at 7:00 AM",
     "Registration remains open until 11:00 PM on August 9th, 2025",
-    "Real-time support chat available before, during, and after the quiz"
+    "Leaderboard will be displayed to the public on August 10th, 2025 at 1:00 AM",
+    "Real-time support chat available before, during, and after the quiz",
+    "Users can use the chat box for any complaints or clarifications"
   ];
 
   return (
