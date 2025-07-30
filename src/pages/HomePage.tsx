@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CountdownTimer from '@/components/CountdownTimer';
@@ -18,6 +18,10 @@ const HomePage: React.FC = () => {
 
   // Quiz date - set to a future date
   const quizDate = new Date('2025-08-09T00:00:00');
+  useEffect(() => {
+    const now = new Date();
+    setQuizAvailable(now >= quizDate);
+  }, []);
 
   const handleStartQuiz = () => {
     navigate('/quiz');
