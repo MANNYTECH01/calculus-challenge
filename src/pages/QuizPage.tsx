@@ -7,7 +7,9 @@ import { useAntiCheat } from '@/hooks/useAntiCheat';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Clock, AlertTriangle, Shield } from 'lucide-react';
+import { Clock, AlertTriangle, Shield, ArrowLeft } from 'lucide-react';
+import { MathText } from '@/components/MathRenderer';
+import MobileNavigation from '@/components/MobileNavigation';
 
 interface Question {
   id: string;
@@ -34,6 +36,8 @@ const QuizPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasAttempted, setHasAttempted] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const forceSubmitRef = useRef(false);
 
@@ -88,14 +92,27 @@ const QuizPage: React.FC = () => {
           score,
           total_questions: questions.length,
           time_taken: timeTaken,
-          quiz_data: quizData,
+          quiz_data: JSON.parse(JSON.stringify({
+            questions: questions.map(q => ({ id: q.id, question_text: q.question_text })),
+            userAnswers: userAnswers,
+            violations: violations
+          })),
           device_fingerprint: generateDeviceFingerprint(),
           ip_address: 'client-side', // Would be set by server in real app
           user_agent: navigator.userAgent,
-          anti_cheat_violations: violations
+          anti_cheat_violations: JSON.parse(JSON.stringify(violations))
         });
 
       if (error) throw error;
+
+      // Update user profile to mark quiz as attempted
+      await supabase
+        .from('profiles')
+        .update({
+          has_attempted_quiz: true,
+          quiz_completed_at: new Date().toISOString()
+        })
+        .eq('user_id', user?.id);
 
       toast({
         title: forced ? "Quiz Auto-Submitted" : "Quiz Submitted Successfully",
@@ -128,10 +145,38 @@ const QuizPage: React.FC = () => {
     }
   });
 
-  // Load questions
+  // Load questions and check if user has already attempted
   useEffect(() => {
-    const loadQuestions = async () => {
+    const loadData = async () => {
       try {
+        // Check if user has already attempted quiz
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('has_attempted_quiz, payment_verified')
+          .eq('user_id', user?.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        setUserProfile(profileData);
+
+        if (profileData.has_attempted_quiz) {
+          setHasAttempted(true);
+          setIsLoading(false);
+          return;
+        }
+
+        if (!profileData.payment_verified) {
+          toast({
+            title: "Payment Required",
+            description: "You need to complete payment verification before taking the quiz.",
+            variant: "destructive",
+          });
+          navigate('/dashboard');
+          return;
+        }
+
+        // Load questions if user hasn't attempted and payment is verified
         const { data, error } = await supabase
           .from('questions')
           .select('*')
@@ -143,10 +188,10 @@ const QuizPage: React.FC = () => {
         const shuffled = [...(data || [])].sort(() => Math.random() - 0.5);
         setQuestions(shuffled);
       } catch (error) {
-        console.error('Error loading questions:', error);
+        console.error('Error loading quiz data:', error);
         toast({
           title: "Error",
-          description: "Failed to load questions. Please try again.",
+          description: "Failed to load quiz. Please try again.",
           variant: "destructive",
         });
         navigate('/');
@@ -156,7 +201,7 @@ const QuizPage: React.FC = () => {
     };
 
     if (user) {
-      loadQuestions();
+      loadData();
     } else {
       navigate('/auth');
     }
@@ -236,6 +281,49 @@ const QuizPage: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading quiz...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasAttempted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Quiz Access Denied
+            </h1>
+            <div className="hidden lg:flex">
+              <Button variant="outline" onClick={() => navigate('/')}>
+                Back to Home
+              </Button>
+            </div>
+            <MobileNavigation />
+          </div>
+        </header>
+        <div className="container mx-auto px-4 py-16">
+          <Card className="max-w-2xl mx-auto">
+            <CardContent className="py-12">
+              <div className="text-center">
+                <Shield className="h-12 w-12 mx-auto text-warning mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Quiz Already Attempted</h3>
+                <p className="text-muted-foreground mb-6">
+                  You have already completed the quiz. Each participant is allowed only one attempt.
+                  <br />
+                  Check the leaderboard for your results or wait for the detailed review to be available.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button variant="outline" onClick={() => navigate('/leaderboard')}>
+                    View Leaderboard
+                  </Button>
+                  <Button onClick={() => navigate('/quiz-review')}>
+                    View Quiz Review
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -336,7 +424,7 @@ const QuizPage: React.FC = () => {
         <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-xl">
-              {currentQuestion?.question_text}
+              <MathText>{currentQuestion?.question_text || ''}</MathText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -355,7 +443,7 @@ const QuizPage: React.FC = () => {
                     onClick={() => handleAnswerSelect(option)}
                   >
                     <span className="font-semibold mr-3">{option}.</span>
-                    <span>{optionText}</span>
+                    <MathText>{optionText || ''}</MathText>
                   </Button>
                 );
               })}

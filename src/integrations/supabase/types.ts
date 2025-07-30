@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          screenshot_url: string | null
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          screenshot_url?: string | null
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          screenshot_url?: string | null
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       answer_explanations: {
         Row: {
           created_at: string
@@ -141,31 +174,46 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_name: string | null
+          account_number: string | null
+          bank_name: string | null
           created_at: string
           full_name: string | null
+          has_attempted_quiz: boolean | null
           id: string
           location: string | null
           payment_verified: boolean | null
+          quiz_completed_at: string | null
           updated_at: string
           user_id: string
           username: string
         }
         Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
           created_at?: string
           full_name?: string | null
+          has_attempted_quiz?: boolean | null
           id?: string
           location?: string | null
           payment_verified?: boolean | null
+          quiz_completed_at?: string | null
           updated_at?: string
           user_id: string
           username: string
         }
         Update: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
           created_at?: string
           full_name?: string | null
+          has_attempted_quiz?: boolean | null
           id?: string
           location?: string | null
           payment_verified?: boolean | null
+          quiz_completed_at?: string | null
           updated_at?: string
           user_id?: string
           username?: string

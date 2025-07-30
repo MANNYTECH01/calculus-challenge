@@ -8,7 +8,8 @@ import PrizeStructure from '@/components/PrizeStructure';
 import SupportChat from '@/components/SupportChat';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, Trophy, BookOpen } from 'lucide-react';
+import { Calendar, Users, Trophy, BookOpen, Menu } from 'lucide-react';
+import MobileNavigation from '@/components/MobileNavigation';
 
 const HomePage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -34,13 +35,15 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             MTH 102 (Calculus Quiz)
           </h1>
-          <div className="flex items-center space-x-4">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-4">
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground hidden xl:block">
                   Welcome, <span className="font-semibold text-foreground">{user.user_metadata?.username || user.email}</span>
                 </span>
                 <Button variant="outline" onClick={handleViewDashboard}>
@@ -56,6 +59,9 @@ const HomePage: React.FC = () => {
               </Button>
             )}
           </div>
+
+          {/* Mobile Navigation */}
+          <MobileNavigation />
         </div>
       </header>
 
@@ -165,10 +171,22 @@ const HomePage: React.FC = () => {
       </main>
 
       <footer className="border-t bg-muted/50 py-8 mt-16">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 text-center space-y-4">
           <p className="text-muted-foreground">
             © 2025 MTH 102 Calculus Quiz. Good luck to all participants!
           </p>
+          <div className="max-w-md mx-auto p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
+            <h4 className="font-semibold mb-2">Need Support?</h4>
+            <p className="text-sm text-muted-foreground mb-2">
+              For complaints or clarification, contact us at:
+            </p>
+            <a 
+              href="mailto:schooltact01@gmail.com"
+              className="text-primary hover:underline font-medium"
+            >
+              schooltact01@gmail.com
+            </a>
+          </div>
         </div>
       </footer>
       
