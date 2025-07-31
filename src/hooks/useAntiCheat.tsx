@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AntiCheatHook {
   violations: string[];
@@ -19,9 +20,25 @@ export const useAntiCheat = ({
 }: UseAntiCheatOptions = {}): AntiCheatHook => {
   const violationsRef = useRef<string[]>([]);
 
-  const addViolation = useCallback((violation: string) => {
+  const addViolation = useCallback(async (violation: string) => {
     violationsRef.current.push(violation);
     onViolation?.(violation);
+    
+    // Log violation to database
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('quiz_violations').insert({
+          user_id: user.id,
+          violation_type: violation.split(' - ')[0] || violation,
+          violation_details: violation,
+          ip_address: 'client-side',
+          user_agent: navigator.userAgent
+        });
+      }
+    } catch (error) {
+      console.error('Failed to log violation:', error);
+    }
     
     toast({
       title: "Security Warning",

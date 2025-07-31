@@ -107,13 +107,47 @@ const AuthPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      const { error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.username);
-      if (!error) {
-        // Initiate payment process immediately after successful sign up
-        await handlePaymentInitiation();
+      // New payment-first signup flow
+      const { data, error } = await supabase.functions.invoke('create-payment-signup', {
+        body: {
+          email: signUpForm.email,
+          password: signUpForm.password,
+          username: signUpForm.username || signUpForm.email.split('@')[0],
+          location: 'Not specified'
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.authorization_url) {
+        // Store signup data for after payment
+        localStorage.setItem('pending_signup', JSON.stringify({
+          email: signUpForm.email,
+          password: signUpForm.password,
+          username: signUpForm.username || signUpForm.email.split('@')[0],
+          location: 'Not specified',
+          reference: data.reference
+        }));
+
+        toast({
+          title: "Redirecting to Payment",
+          description: "You'll be redirected to Paystack to complete your ₦1000 payment. After payment, your account will be created and verified automatically.",
+        });
+
+        // Redirect to Paystack
+        setTimeout(() => {
+          window.location.href = data.authorization_url;
+        }, 1500);
+      } else {
+        throw new Error('Payment initialization failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign up error:', error);
+      toast({
+        title: "Sign Up Failed",
+        description: error.message || "Failed to initialize payment. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

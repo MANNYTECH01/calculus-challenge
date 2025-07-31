@@ -11,9 +11,10 @@ const QuizRules: React.FC = () => {
     "Screenshots will be detected; any attempt will result in disqualification",
     "Copying/Right-clicking/Highlighting is disabled",
     "You have only one attempt",
-    "Correct Answers & Explanations will be released on August 10th, 2025 at 7:00 AM",
-    "Winner Announcement: August 10th, 2025 at 7:00 AM",
-    "Leaderboard will be displayed on August 10th, 2025 at 1:00 AM",
+    "Quiz Duration: 60 minutes (1 hour)",
+    "Correct Answers & Explanations will be released on August 19th, 2025 at 7:00 AM",
+    "Winner Announcement: August 19th, 2025 at 7:00 AM",
+    "Leaderboard will be displayed on August 19th, 2025 at 1:00 AM",
     "Use the chat box for any complaints or clarifications"
   ];
 

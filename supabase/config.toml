@@ -1,1 +1,13 @@
 project_id = "algqekyoaskhdxuegirh"
+
+[functions.create-payment]
+verify_jwt = false
+
+[functions.verify-payment]
+verify_jwt = false
+
+[functions.create-payment-signup]
+verify_jwt = false
+
+[functions.verify-payment-and-signup]
+verify_jwt = false

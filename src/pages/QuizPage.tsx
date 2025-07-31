@@ -32,7 +32,7 @@ const QuizPage: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
-  const [timeLeft, setTimeLeft] = useState(40 * 60); // 40 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes in seconds
   const [isLoading, setIsLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,7 +82,7 @@ const QuizPage: React.FC = () => {
         };
       });
 
-      const timeTaken = (40 * 60) - timeLeft;
+      const timeTaken = (60 * 60) - timeLeft;
       
       // Submit to database
       const { error } = await supabase
@@ -344,7 +344,7 @@ const QuizPage: React.FC = () => {
                 <Clock className="h-6 w-6 text-primary" />
                 <div>
                   <div className="font-semibold">Duration</div>
-                  <div className="text-sm text-muted-foreground">40 minutes</div>
+                  <div className="text-sm text-muted-foreground">60 minutes</div>
                 </div>
               </div>
               <div className="flex items-center space-x-3 p-4 bg-accent/10 rounded-lg">

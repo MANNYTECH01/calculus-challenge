@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_panel: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       answer_explanations: {
         Row: {
           created_at: string
@@ -311,6 +332,39 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      quiz_violations: {
+        Row: {
+          id: string
+          ip_address: string | null
+          quiz_attempt_id: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string
+          violation_details: string | null
+          violation_type: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          quiz_attempt_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id: string
+          violation_details?: string | null
+          violation_type: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          quiz_attempt_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string
+          violation_details?: string | null
+          violation_type?: string
+        }
+        Relationships: []
       }
       support_messages: {
         Row: {

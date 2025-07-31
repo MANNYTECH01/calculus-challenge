@@ -17,7 +17,7 @@ const HomePage: React.FC = () => {
   const [quizAvailable, setQuizAvailable] = useState(false);
 
   // Quiz date - set to a future date
-  const quizDate = new Date('2025-08-09T00:00:00');
+  const quizDate = new Date('2025-08-18T00:00:00');
   useEffect(() => {
     const now = new Date();
     setQuizAvailable(now >= quizDate);
@@ -101,7 +101,7 @@ const HomePage: React.FC = () => {
           <Card className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
             <CardContent className="p-6">
               <Calendar className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-bold text-foreground">Aug 9</div>
+              <div className="text-2xl font-bold text-foreground">Aug 18</div>
               <div className="text-sm text-muted-foreground">Quiz Date</div>
             </CardContent>
           </Card>
@@ -117,7 +117,7 @@ const HomePage: React.FC = () => {
           <Card className="text-center bg-gradient-to-br from-success/10 to-warning/10 border-success/20">
             <CardContent className="p-6">
               <Users className="h-8 w-8 mx-auto mb-2 text-success" />
-              <div className="text-2xl font-bold text-foreground">40</div>
+              <div className="text-2xl font-bold text-foreground">60</div>
               <div className="text-sm text-muted-foreground">Minutes</div>
             </CardContent>
           </Card>
