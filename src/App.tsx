@@ -11,6 +11,7 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import DashboardPage from "./pages/DashboardPage";
 import MessagesPage from "./pages/MessagesPage";
 import QuizReviewPage from "./pages/QuizReviewPage";
+import CreateUsersPage from "./pages/CreateUsersPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
@@ -31,7 +32,8 @@ const App = () => (
             <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/quiz-review" element={<QuizReviewPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+            <Route path="/create-users" element={<CreateUsersPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

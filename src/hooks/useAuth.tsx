@@ -19,6 +19,8 @@ const cleanupAuthState = () => {
       sessionStorage.removeItem(key);
     }
   });
+  // Clear any cached queries or state
+  window.location.hash = '';
 };
 
 interface AuthContextType {
@@ -107,14 +109,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Clean up existing state first
       cleanupAuthState();
+      
+      // Wait a bit to ensure cleanup completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Continue even if this fails
+        console.log('Signout before signin failed, continuing...');
       }
 
+      // Wait a bit more
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
@@ -123,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error.message.includes('Email not confirmed')) {
           errorMessage = "Please check your email and click the verification link before signing in.";
         } else if (error.message.includes('Invalid login credentials')) {
-          errorMessage = "Invalid email or password. Please check your credentials.";
+          errorMessage = "Invalid email or password. Please check your credentials and try again.";
         }
         
         toast({
@@ -131,19 +141,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           description: errorMessage,
           variant: "destructive",
         });
-      } else if (data.user) {
+        
+        return { error };
+      } 
+      
+      if (data.user) {
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",
         });
-        // Force page reload for clean state
+        
+        // Force page reload for clean state with a slight delay
         setTimeout(() => {
           window.location.href = '/';
-        }, 1000);
+        }, 500);
       }
 
-      return { error };
+      return { error: null };
     } catch (error: any) {
+      console.error('Sign in error:', error);
       toast({
         title: "Sign In Failed",
         description: error.message || "An unexpected error occurred",
