@@ -55,8 +55,8 @@ const QuizReviewPage: React.FC = () => {
 
   const checkReviewAvailability = async () => {
     try {
-      // Check if it's after August 10th, 2025 at 7:00 AM UTC (quiz results release)
-      const reviewReleaseDate = new Date('2025-08-10T07:00:00Z');
+      // Check if it's after August 19th, 2025 at 7:00 AM UTC (quiz results release)
+      const reviewReleaseDate = new Date('2025-08-19T07:00:00Z');
       const now = new Date();
       
       if (now < reviewReleaseDate) {
@@ -197,7 +197,7 @@ const QuizReviewPage: React.FC = () => {
                 <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Quiz Review Not Available Yet</h3>
                 <p className="text-muted-foreground">
-                  Quiz review will be available after August 10th, 2025 at 7:00 AM.
+                  Quiz review will be available after August 19th, 2025 at 7:00 AM.
                   <br />
                   Check back after the results are officially released!
                 </p>
