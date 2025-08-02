@@ -142,9 +142,9 @@ const LeaderboardPage: React.FC = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             MTH 102 Calculus Quiz Competition - August 16th, 2025
             <br />
-            Leaderboard available from August 17th, 2025 at 1:00 AM
+            Leaderboard available from August 17th, 2025 at 04:00 AM
             <br />
-            Winner will be announced on August 17th, 2025 at 7:00 AM
+            Winner will be announced on August 17th, 2025 at 10:00 AM
           </p>
         </div>
 
@@ -157,7 +157,7 @@ const LeaderboardPage: React.FC = () => {
                   <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Leaderboard Coming Soon</h3>
                   <p className="text-muted-foreground">
-                    The leaderboard will be displayed publicly on August 17th, 2025 at 1:00 AM.
+                    The leaderboard will be displayed publicly on August 17th, 2025 at 04:00 AM.
                     <br />
                     Complete the quiz to compete for the top positions!
                   </p>
