@@ -120,7 +120,7 @@ const PrizeStructure: React.FC = () => {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               <strong>Winners will be announced:</strong><br />
-              August 17th, 2025 at 7:00 AM
+              August 17th, 2025 at 10:00 AM
             </p>
           </div>
         </div>
