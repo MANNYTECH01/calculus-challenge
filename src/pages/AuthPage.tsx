@@ -83,8 +83,33 @@ const AuthPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      // First check if user has paid
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('payment_verified')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
       const { error } = await signIn(signInForm.email, signInForm.password);
-      // Don't show additional toast here - the useAuth hook handles it
+      
+      if (!error) {
+        // Check payment status after successful login
+        const { data: userProfile } = await supabase
+          .from('profiles')
+          .select('payment_verified')
+          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+          .single();
+
+        if (!userProfile?.payment_verified) {
+          await supabase.auth.signOut();
+          toast({
+            title: "Payment Required",
+            description: "Please complete your ₦1000 payment to access the portal.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
     } catch (error) {
       console.error('Sign in error:', error);
     } finally {

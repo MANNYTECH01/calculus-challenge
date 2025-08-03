@@ -146,6 +146,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } 
       
       if (data.user) {
+        // Check payment verification before allowing access
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('payment_verified')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (!profile?.payment_verified) {
+          await supabase.auth.signOut();
+          toast({
+            title: "Payment Required",
+            description: "Please complete your ₦1000 payment to access the portal.",
+            variant: "destructive",
+          });
+          return { error: { message: 'Payment required' } };
+        }
+
         toast({
           title: "Welcome back!",
           description: "You have been successfully signed in.",

@@ -8,9 +8,11 @@ interface MathRendererProps {
 }
 
 const mathJaxConfig = {
-  loader: { load: ["[tex]/html"] },
+  loader: { 
+    load: ["[tex]/html", "[tex]/amsmath", "[tex]/amssymb", "[tex]/amsfonts"] 
+  },
   tex: {
-    packages: { "[+]": ["html"] },
+    packages: { "[+]": ["html", "amsmath", "amssymb", "amsfonts"] },
     inlineMath: [
       ["$", "$"],
       ["\\(", "\\)"]
@@ -18,7 +20,23 @@ const mathJaxConfig = {
     displayMath: [
       ["$$", "$$"],
       ["\\[", "\\]"]
-    ]
+    ],
+    macros: {
+      "\\frac": ["\\frac{#1}{#2}", 2],
+      "\\int": "\\int",
+      "\\sum": "\\sum",
+      "\\prod": "\\prod",
+      "\\sqrt": ["\\sqrt{#1}", 1],
+      "\\infty": "\\infty"
+    },
+    tags: "ams",
+    useLabelIds: true
+  },
+  options: {
+    renderActions: {
+      addMenu: [],
+      checkLoading: []
+    }
   }
 };
 

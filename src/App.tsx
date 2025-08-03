@@ -13,6 +13,7 @@ import MessagesPage from "./pages/MessagesPage";
 import QuizReviewPage from "./pages/QuizReviewPage";
 import CreateUsersPage from "./pages/CreateUsersPage";
 import AdminPage from "./pages/AdminPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/quiz-review" element={<QuizReviewPage />} />
             <Route path="/create-users" element={<CreateUsersPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
