@@ -5,21 +5,17 @@ import { toast } from '@/hooks/use-toast';
 
 // Cleanup function to remove auth state
 const cleanupAuthState = () => {
-  // Remove standard auth tokens
   localStorage.removeItem('supabase.auth.token');
-  // Remove all Supabase auth keys from localStorage
   Object.keys(localStorage).forEach((key) => {
     if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
       localStorage.removeItem(key);
     }
   });
-  // Remove from sessionStorage if in use
   Object.keys(sessionStorage || {}).forEach((key) => {
     if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
       sessionStorage.removeItem(key);
     }
   });
-  // Clear any cached queries or state
   window.location.hash = '';
 };
 
@@ -40,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -49,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -61,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
-      // Clean up existing state first
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: 'global' });
@@ -107,20 +100,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Clean up existing state first
       cleanupAuthState();
-      
-      // Wait a bit to ensure cleanup completes
       await new Promise(resolve => setTimeout(resolve, 100));
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        // Continue even if this fails
         console.log('Signout before signin failed, continuing...');
       }
 
-      // Wait a bit more
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -146,7 +134,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } 
       
       if (data.user) {
-        // Check payment verification before allowing access
+        // Special handling for the admin user
+        if (data.user.email === 'schooltact01@gmail.com') {
+          toast({
+            title: "Admin Login Successful",
+            description: "Redirecting to the admin dashboard...",
+          });
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 500);
+          return { error: null };
+        }
+
+        // For regular users, check payment verification
         const { data: profile } = await supabase
           .from('profiles')
           .select('payment_verified')
@@ -168,7 +168,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           description: "You have been successfully signed in.",
         });
         
-        // Force page reload for clean state with a slight delay
         setTimeout(() => {
           window.location.href = '/';
         }, 500);
@@ -188,10 +187,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clean up auth state first
       cleanupAuthState();
       
-      // Attempt global sign out (ignore errors)
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
@@ -203,10 +200,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "You have been successfully signed out.",
       });
       
-      // Force page reload for clean state
       window.location.href = '/auth';
     } catch (error: any) {
-      // Even if signOut fails, clean up and redirect
       cleanupAuthState();
       window.location.href = '/auth';
     }

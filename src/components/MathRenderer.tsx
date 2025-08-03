@@ -1,70 +1,25 @@
 import React from 'react';
-import { MathJax, MathJaxContext } from 'better-react-mathjax';
+import { MathJax } from 'better-react-mathjax';
 
-interface MathRendererProps {
-  children: string;
-  inline?: boolean;
-  className?: string;
-}
-
-const mathJaxConfig = {
-  loader: { 
-    load: ["[tex]/html", "[tex]/amsmath", "[tex]/amssymb", "[tex]/amsfonts"] 
-  },
-  tex: {
-    packages: { "[+]": ["html", "amsmath", "amssymb", "amsfonts"] },
-    inlineMath: [
-      ["$", "$"],
-      ["\\(", "\\)"]
-    ],
-    displayMath: [
-      ["$$", "$$"],
-      ["\\[", "\\]"]
-    ],
-    macros: {
-      "\\frac": ["\\frac{#1}{#2}", 2],
-      "\\int": "\\int",
-      "\\sum": "\\sum",
-      "\\prod": "\\prod",
-      "\\sqrt": ["\\sqrt{#1}", 1],
-      "\\infty": "\\infty"
-    },
-    tags: "ams",
-    useLabelIds: true
-  },
-  options: {
-    renderActions: {
-      addMenu: [],
-      checkLoading: []
-    }
-  }
-};
-
-export const MathRenderer: React.FC<MathRendererProps> = ({ 
+// A simplified, general-purpose MathRenderer component
+const MathRenderer: React.FC<{ children: string; inline?: boolean; className?: string }> = ({ 
   children, 
   inline = false, 
   className = "" 
 }) => {
-  // Check if the text contains math expressions
-  const containsMath = children.includes('$') || children.includes('\\(') || children.includes('\\[');
-  
-  if (!containsMath) {
-    return <span className={className}>{children}</span>;
-  }
-
   return (
-    <MathJaxContext config={mathJaxConfig}>
-      <MathJax 
-        inline={inline} 
-        className={className}
-      >
-        {children}
-      </MathJax>
-    </MathJaxContext>
+    <MathJax 
+      inline={inline} 
+      className={className}
+      // Hide the initial text until it's rendered to prevent flash of raw TeX
+      hideUntilTypeset={"first"} 
+    >
+      {children}
+    </MathJax>
   );
 };
 
-// Wrapper component for easy math rendering
+// Wrapper for inline math text (like in buttons or paragraphs)
 export const MathText: React.FC<{ children: string; className?: string }> = ({ 
   children, 
   className 
@@ -74,6 +29,7 @@ export const MathText: React.FC<{ children: string; className?: string }> = ({
   </MathRenderer>
 );
 
+// Wrapper for block-level math equations (displayed on their own line)
 export const MathBlock: React.FC<{ children: string; className?: string }> = ({ 
   children, 
   className 

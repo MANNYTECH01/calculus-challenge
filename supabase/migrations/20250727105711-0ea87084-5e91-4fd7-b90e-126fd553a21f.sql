@@ -5,15 +5,10 @@ FOREIGN KEY (user_id) REFERENCES public.profiles(user_id) ON DELETE CASCADE;
 
 -- Update questions to have 40 questions limit and add sample calculus questions
 INSERT INTO public.questions (question_text, option_a, option_b, option_c, option_d, correct_answer, difficulty_level) VALUES
-('What is the limit of (x² - 4)/(x - 2) as x approaches 2?', '0', '2', '4', 'undefined', 'C', 'medium'),
-('The derivative of x³ + 2x² - 5x + 1 is:', '3x² + 4x - 5', '3x² + 2x - 5', 'x² + 4x - 5', '3x + 4', 'A', 'easy'),
-('∫(2x + 3)dx equals:', 'x² + 3x + C', '2x² + 3x + C', 'x² + 6x + C', '2x + 3x + C', 'A', 'easy'),
 ('The fundamental theorem of calculus connects:', 'Derivatives and integrals', 'Limits and continuity', 'Functions and graphs', 'Series and sequences', 'A', 'medium'),
 ('If f(x) = sin(x), then f''(x) = ?', 'cos(x)', '-cos(x)', '-sin(x)', 'sin(x)', 'C', 'medium'),
 ('The chain rule states that d/dx[f(g(x))] = ?', 'f''(g(x)) · g''(x)', 'f''(g(x)) + g''(x)', 'f''(g(x)) · g(x)', 'f''(g(x)) / g''(x)', 'A', 'medium'),
 ('What is lim(x→0) (sin x)/x ?', '0', '1', '∞', 'undefined', 'B', 'hard'),
-('The product rule for derivatives is:', '(uv)'' = u''v + uv''', '(uv)'' = u''v - uv''', '(uv)'' = (u + v)''', '(uv)'' = u''/v''', 'A', 'medium'),
-('∫sin(x)dx = ?', 'cos(x) + C', '-cos(x) + C', 'sin(x) + C', '-sin(x) + C', 'B', 'easy'),
 ('A function is continuous at x = a if:', 'lim(x→a) f(x) = f(a)', 'f(a) exists', 'lim(x→a) f(x) exists', 'All of the above', 'D', 'medium'),
 ('The quotient rule is:', '(u/v)'' = (u''v - uv'')/v²', '(u/v)'' = (u''v + uv'')/v²', '(u/v)'' = u''/v''', '(u/v)'' = (uv'' - u''v)/v²', 'A', 'hard'),
 ('d/dx[eˣ] = ?', 'eˣ', 'xeˣ⁻¹', 'e', 'ln(x)', 'A', 'easy'),

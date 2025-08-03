@@ -19,6 +19,7 @@ interface Question {
   option_c: string;
   option_d: string;
   correct_answer: string;
+  category: string;
 }
 
 interface UserAnswer {
@@ -32,133 +33,103 @@ const QuizPage: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
-  const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes
   const [isLoading, setIsLoading] = useState(true);
   const [quizStarted, setQuizStarted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasAttempted, setHasAttempted] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const forceSubmitRef = useRef(false);
 
-  // Generate device fingerprint
   const generateDeviceFingerprint = useCallback(() => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    ctx?.fillText('fingerprint', 10, 10);
+    if (ctx) {
+        ctx.fillText('fingerprint', 10, 10);
+    }
     const canvasFingerprint = canvas.toDataURL();
     
     return btoa(JSON.stringify({
       userAgent: navigator.userAgent,
       language: navigator.language,
       platform: navigator.platform,
-      cookieEnabled: navigator.cookieEnabled,
       screenWidth: screen.width,
       screenHeight: screen.height,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      canvas: canvasFingerprint.slice(-50) // Last 50 chars for brevity
+      canvas: canvasFingerprint.slice(-50)
     }));
   }, []);
 
   const submitQuiz = useCallback(async (forced = false) => {
-    if (isSubmitting) return;
+    if (isSubmitting || forceSubmitRef.current) return;
     setIsSubmitting(true);
     forceSubmitRef.current = true;
 
     try {
-      // Calculate score
       let score = 0;
-      const quizData = questions.map(question => {
+      questions.forEach(question => {
         const userAnswer = userAnswers.find(a => a.questionId === question.id);
-        const isCorrect = userAnswer?.answer === question.correct_answer;
-        if (isCorrect) score++;
-        
-        return {
-          questionId: question.id,
-          questionText: question.question_text,
-          correctAnswer: question.correct_answer,
-          userAnswer: userAnswer?.answer || null,
-          isCorrect
-        };
+        if (userAnswer?.answer === question.correct_answer) {
+          score++;
+        }
       });
 
       const timeTaken = (60 * 60) - timeLeft;
       
-      // Submit to database
-      const { error } = await supabase
-        .from('quiz_attempts')
-        .insert({
-          user_id: user?.id,
-          score,
-          total_questions: questions.length,
-          time_taken: timeTaken,
-          quiz_data: JSON.parse(JSON.stringify({
-            questions: questions.map(q => ({ id: q.id, question_text: q.question_text })),
-            userAnswers: userAnswers,
-            violations: violations
-          })),
-          device_fingerprint: generateDeviceFingerprint(),
-          ip_address: 'client-side', // Would be set by server in real app
-          user_agent: navigator.userAgent,
-          anti_cheat_violations: JSON.parse(JSON.stringify(violations))
-        });
+      await supabase.from('quiz_attempts').insert({
+        user_id: user?.id,
+        score,
+        total_questions: questions.length,
+        time_taken: timeTaken,
+        quiz_data: { questions: questions.map(q => ({ id: q.id })), userAnswers },
+        device_fingerprint: generateDeviceFingerprint(),
+        user_agent: navigator.userAgent,
+        anti_cheat_violations: violations
+      });
 
-      if (error) throw error;
+      await supabase.from('profiles').update({ has_attempted_quiz: true, quiz_completed_at: new Date().toISOString() }).eq('user_id', user?.id);
 
-      // Update user profile to mark quiz as attempted
-      await supabase
-        .from('profiles')
-        .update({
-          has_attempted_quiz: true,
-          quiz_completed_at: new Date().toISOString()
-        })
-        .eq('user_id', user?.id);
-
+      // This is the updated toast notification
+      const percentage = Math.round((score / questions.length) * 100);
       toast({
         title: forced ? "Quiz Auto-Submitted" : "Quiz Submitted Successfully",
-        description: `Your score: ${score}/${questions.length}`,
+        description: `Your score: ${score}/${questions.length} (${percentage}%)`,
         variant: forced ? "destructive" : "default",
       });
 
       navigate('/leaderboard');
     } catch (error) {
-      console.error('Error submitting quiz:', error);
-      toast({
-        title: "Submission Error",
-        description: "Failed to submit quiz. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
+      toast({ title: "Submission Error", description: "Failed to submit quiz.", variant: "destructive" });
       setIsSubmitting(false);
+      forceSubmitRef.current = false;
     }
-  }, [questions, userAnswers, timeLeft, user?.id, navigate, generateDeviceFingerprint, isSubmitting]);
+  }, [questions, userAnswers, timeLeft, user?.id, navigate, generateDeviceFingerprint, isSubmitting, violations]);
 
-  const { violations, addViolation } = useAntiCheat({
+  const { violations } = useAntiCheat({
     enabled: quizStarted,
-    onViolation: (violation) => {
-      console.log('Anti-cheat violation:', violation);
-    },
-    onForceSubmit: () => {
-      if (!forceSubmitRef.current) {
-        submitQuiz(true);
-      }
-    }
+    onForceSubmit: () => submitQuiz(true)
   });
 
-  // Load questions and check if user has already attempted
   useEffect(() => {
     const loadData = async () => {
+      if (!user) {
+        navigate('/auth');
+        return;
+      }
+
+      const quizStartDate = new Date('2025-08-16T00:00:00Z');
+      const quizEndDate = new Date('2025-08-16T23:59:59Z');
+      const now = new Date();
+
+      if (now < quizStartDate || now > quizEndDate) {
+        toast({ title: "Quiz Not Available", description: "The quiz can only be taken on August 16th, 2025.", variant: "destructive" });
+        navigate('/');
+        return;
+      }
+
       try {
-        // Check if user has already attempted quiz
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('has_attempted_quiz, payment_verified')
-          .eq('user_id', user?.id)
-          .single();
-
+        const { data: profileData, error: profileError } = await supabase.from('profiles').select('has_attempted_quiz, payment_verified').eq('user_id', user.id).single();
         if (profileError) throw profileError;
-
-        setUserProfile(profileData);
 
         if (profileData.has_attempted_quiz) {
           setHasAttempted(true);
@@ -167,53 +138,42 @@ const QuizPage: React.FC = () => {
         }
 
         if (!profileData.payment_verified) {
-          toast({
-            title: "Payment Required",
-            description: "You need to complete payment verification before taking the quiz.",
-            variant: "destructive",
-          });
+          toast({ title: "Payment Required", description: "You must complete payment to take the quiz.", variant: "destructive" });
           navigate('/dashboard');
           return;
         }
 
-        // Load questions if user hasn't attempted and payment is verified
-        const { data, error } = await supabase
-          .from('questions')
-          .select('*')
-          .limit(40);
+        // Fetch questions based on categories
+        const categories = { functions: 5, limits: 7, differentiation: 14, integration: 12, applications: 2 };
+        const fetchedQuestions: Question[] = [];
 
-        if (error) throw error;
-
-        // Randomize questions
-        const shuffled = [...(data || [])].sort(() => Math.random() - 0.5);
-        setQuestions(shuffled);
+        for (const [category, count] of Object.entries(categories)) {
+            const { data, error } = await supabase.rpc('get_random_questions_by_category', { p_category: category, p_limit: count });
+            if (error) throw error;
+            fetchedQuestions.push(...data);
+        }
+        
+        setQuestions(fetchedQuestions.sort(() => Math.random() - 0.5)); // Shuffle the final set
       } catch (error) {
-        console.error('Error loading quiz data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load quiz. Please try again.",
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: "Failed to load quiz questions.", variant: "destructive" });
         navigate('/');
       } finally {
         setIsLoading(false);
       }
     };
-
-    if (user) {
-      loadData();
-    } else {
-      navigate('/auth');
-    }
+    loadData();
   }, [user, navigate]);
 
-  // Timer effect
   useEffect(() => {
-    if (!quizStarted) return;
+    if (!quizStarted || timeLeft <= 0) {
+      if(timerRef.current) clearInterval(timerRef.current);
+      return;
+    };
 
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
+          if(timerRef.current) clearInterval(timerRef.current);
           submitQuiz(true);
           return 0;
         }
@@ -222,27 +182,11 @@ const QuizPage: React.FC = () => {
     }, 1000);
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [quizStarted, submitQuiz]);
+  }, [quizStarted, timeLeft, submitQuiz]);
 
-  // Add quiz mode class to body
-  useEffect(() => {
-    if (quizStarted) {
-      document.body.classList.add('quiz-mode');
-      return () => document.body.classList.remove('quiz-mode');
-    }
-  }, [quizStarted]);
-
-  const startQuiz = () => {
-    setQuizStarted(true);
-    toast({
-      title: "Quiz Started",
-      description: "Good luck! Remember, you cannot pause or restart.",
-    });
-  };
+  const startQuiz = () => setQuizStarted(true);
 
   const handleAnswerSelect = (answer: string) => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -257,18 +201,9 @@ const QuizPage: React.FC = () => {
     });
   };
 
-  const goToNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    }
-  };
-
-  const goToPreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
-    }
-  };
-
+  const goToNextQuestion = () => setCurrentQuestionIndex(prev => Math.min(prev + 1, questions.length - 1));
+  const goToPreviousQuestion = () => setCurrentQuestionIndex(prev => Math.max(prev - 1, 0));
+  
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -289,38 +224,23 @@ const QuizPage: React.FC = () => {
   if (hasAttempted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Quiz Access Denied
-            </h1>
-            <div className="hidden lg:flex">
-              <Button variant="outline" onClick={() => navigate('/')}>
-                Back to Home
-              </Button>
-            </div>
+            <h1 className="text-xl md:text-2xl font-bold">Quiz Access Denied</h1>
             <MobileNavigation />
           </div>
         </header>
         <div className="container mx-auto px-4 py-16">
           <Card className="max-w-2xl mx-auto">
-            <CardContent className="py-12">
-              <div className="text-center">
-                <Shield className="h-12 w-12 mx-auto text-warning mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Quiz Already Attempted</h3>
-                <p className="text-muted-foreground mb-6">
-                  You have already completed the quiz. Each participant is allowed only one attempt.
-                  <br />
-                  Check the leaderboard for your results or wait for the detailed review to be available.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="outline" onClick={() => navigate('/leaderboard')}>
-                    View Leaderboard
-                  </Button>
-                  <Button onClick={() => navigate('/quiz-review')}>
-                    View Quiz Review
-                  </Button>
-                </div>
+            <CardContent className="py-12 text-center">
+              <Shield className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Quiz Already Attempted</h3>
+              <p className="text-muted-foreground mb-6">
+                You have already completed the quiz. Each participant is allowed only one attempt.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button variant="outline" onClick={() => navigate('/leaderboard')}>View Leaderboard</Button>
+                <Button onClick={() => navigate('/quiz-review')}>View Quiz Review</Button>
               </div>
             </CardContent>
           </Card>
@@ -332,56 +252,44 @@ const QuizPage: React.FC = () => {
   if (!quizStarted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-        <Card className="max-w-2xl w-full bg-card/50 backdrop-blur-sm border-primary/20">
+        <Card className="max-w-2xl w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Ready to Start Quiz?
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold">Ready to Start Quiz?</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center space-x-3 p-4 bg-primary/10 rounded-lg">
+              <div className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
                 <Clock className="h-6 w-6 text-primary" />
                 <div>
                   <div className="font-semibold">Duration</div>
                   <div className="text-sm text-muted-foreground">60 minutes</div>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 p-4 bg-accent/10 rounded-lg">
-                <Shield className="h-6 w-6 text-accent" />
+              <div className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
+                <Shield className="h-6 w-6 text-primary" />
                 <div>
                   <div className="font-semibold">Questions</div>
                   <div className="text-sm text-muted-foreground">{questions.length} questions</div>
                 </div>
               </div>
             </div>
-
-            <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
               <div className="flex items-start space-x-3">
-                <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
-                <div className="space-y-2">
-                  <div className="font-semibold text-warning">Important Warnings:</div>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• Once started, you cannot pause or restart</li>
-                    <li>• Tab switching will auto-submit your quiz</li>
-                    <li>• Screenshots during the quiz will be detected and will result in disqualification</li>
-                    <li>• Copying is disabled</li>
-                    <li>• You have only one attempt</li>
+                <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+                <div>
+                  <div className="font-semibold text-destructive">Important Warnings:</div>
+                  <ul className="text-sm space-y-1 text-muted-foreground list-disc pl-5 mt-2">
+                    <li>Once started, you cannot pause or restart.</li>
+                    <li>Switching tabs will auto-submit your quiz.</li>
+                    <li>Screenshots and copying are disabled and monitored.</li>
+                    <li>You have only one attempt.</li>
                   </ul>
                 </div>
               </div>
             </div>
-
             <div className="flex justify-center space-x-4">
-              <Button variant="outline" onClick={() => navigate('/')}>
-                Go Back
-              </Button>
-              <Button 
-                onClick={startQuiz}
-                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
-              >
-                Start Quiz Now
-              </Button>
+              <Button variant="outline" onClick={() => navigate('/')}>Go Back</Button>
+              <Button onClick={startQuiz} className="bg-primary hover:bg-primary/90">Start Quiz Now</Button>
             </div>
           </CardContent>
         </Card>
@@ -395,13 +303,10 @@ const QuizPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 no-select">
-      {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="text-xl font-bold text-primary">
-              MTH 102 Quiz
-            </div>
+            <div className="text-xl font-bold text-primary">MTH 102 Quiz</div>
             <div className="flex items-center space-x-6">
               <div className="text-lg font-mono bg-primary/10 px-3 py-1 rounded-lg">
                 <Clock className="inline h-4 w-4 mr-2" />
@@ -412,14 +317,9 @@ const QuizPage: React.FC = () => {
               </div>
             </div>
           </div>
-          
-          <div className="mt-4">
-            <Progress value={progress} className="h-2" />
-          </div>
+          <div className="mt-4"><Progress value={progress} className="h-2" /></div>
         </div>
       </header>
-
-      {/* Quiz Content */}
       <main className="container mx-auto px-4 py-8">
         <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-sm">
           <CardHeader>
@@ -430,16 +330,13 @@ const QuizPage: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="grid gap-3">
               {['A', 'B', 'C', 'D'].map((option) => {
-                const optionText = currentQuestion?.[`option_${option.toLowerCase()}` as keyof Question] as string;
-                const isSelected = currentAnswer === option;
-                
+                const optionKey = `option_${option.toLowerCase() as 'a'}`;
+                const optionText = currentQuestion?.[optionKey as keyof Question] as string;
                 return (
                   <Button
                     key={option}
-                    variant={isSelected ? "default" : "outline"}
-                    className={`p-4 h-auto text-left justify-start ${
-                      isSelected ? 'bg-primary text-primary-foreground' : ''
-                    }`}
+                    variant={currentAnswer === option ? "default" : "outline"}
+                    className="p-4 h-auto text-left justify-start"
                     onClick={() => handleAnswerSelect(option)}
                   >
                     <span className="font-semibold mr-3">{option}.</span>
@@ -448,54 +345,17 @@ const QuizPage: React.FC = () => {
                 );
               })}
             </div>
-
             <div className="flex justify-between items-center pt-6">
-              <Button
-                variant="outline"
-                onClick={goToPreviousQuestion}
-                disabled={currentQuestionIndex === 0}
-              >
-                Previous
-              </Button>
-
-              <div className="text-sm text-muted-foreground">
-                {userAnswers.length} of {questions.length} answered
-              </div>
-
+              <Button onClick={goToPreviousQuestion} disabled={currentQuestionIndex === 0} variant="outline">Previous</Button>
+              <div className="text-sm text-muted-foreground">{userAnswers.length} of {questions.length} answered</div>
               {currentQuestionIndex === questions.length - 1 ? (
-                <Button
-                  onClick={() => submitQuiz(false)}
-                  disabled={isSubmitting}
-                  className="bg-gradient-to-r from-success to-accent hover:from-success/90 hover:to-accent/90"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
-                </Button>
+                <Button onClick={() => submitQuiz(false)} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">Submit Quiz</Button>
               ) : (
-                <Button
-                  onClick={goToNextQuestion}
-                  disabled={currentQuestionIndex === questions.length - 1}
-                >
-                  Next
-                </Button>
+                <Button onClick={goToNextQuestion}>Next</Button>
               )}
             </div>
           </CardContent>
         </Card>
-
-        {/* Security Status */}
-        <div className="max-w-4xl mx-auto mt-4">
-          <Card className="bg-warning/5 border-warning/20">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2 text-sm">
-                <Shield className="h-4 w-4 text-warning" />
-                <span className="text-warning font-semibold">Security Active:</span>
-                <span className="text-muted-foreground">
-                  Anti-cheat monitoring enabled • {violations.length} violations detected
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </main>
     </div>
   );

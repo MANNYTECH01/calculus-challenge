@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "lib/": "./_shared/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+    "https://deno.land/std@0.190.0/crypto/mod.ts": "https://deno.land/std@0.190.0/crypto/mod.ts"
+  }
+}
