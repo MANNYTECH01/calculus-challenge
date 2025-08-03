@@ -20,25 +20,13 @@ import QuestionPreviewPage from "./pages/QuestionPreviewPage";
 
 const queryClient = new QueryClient();
 
-// CORRECTED MathJax configuration
-const mathJaxConfig = {
-  tex: {
-    inlineMath: [
-      ["$", "$"],
-      ["\\(", "\\)"],
-    ],
-    displayMath: [
-      ["$$", "$$"],
-      ["\\[", "\\]"],
-    ],
-  },
-};
+// No config object is needed here anymore, as it's now handled globally in index.html.
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <MathJaxContext config={mathJaxConfig}>
+        <MathJaxContext>
           <Toaster />
           <Sonner />
           <BrowserRouter>
