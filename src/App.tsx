@@ -20,7 +20,7 @@ import QuestionPreviewPage from "./pages/QuestionPreviewPage";
 
 const queryClient = new QueryClient();
 
-// This configuration is centralized here to ensure MathJax works correctly.
+// FIX: The configuration is placed back here with an option to prevent rendering race conditions.
 const mathJaxConfig = {
   tex: {
     inlineMath: [
@@ -31,6 +31,10 @@ const mathJaxConfig = {
       ["$$", "$$"],
       ["\\[", "\\]"],
     ],
+  },
+  // This option hides the raw LaTeX code until MathJax has finished rendering it.
+  startup: {
+    hideUntilTypeset: "first",
   },
 };
 
