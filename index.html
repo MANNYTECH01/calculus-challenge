@@ -19,7 +19,7 @@
     <meta name="twitter:title" content="MTH102 – Calculus Quiz Challenge" />
     <meta name="twitter:description" content="Test your skills. Win Prizes. August 16th." />
 
-    <!-- Simplified MathJax Configuration for Production -->
+    <!-- MathJax Configuration and Loading -->
     <script>
       window.MathJax = {
         tex: {
@@ -29,14 +29,17 @@
           processEnvironments: true
         },
         startup: {
-          typeset: false
+          ready: () => {
+            console.log('MathJax is ready and loaded');
+            window.MathJax.startup.defaultReady();
+          }
         },
         options: {
           skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
         }
       };
     </script>
-    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   </head>
 
   <body>

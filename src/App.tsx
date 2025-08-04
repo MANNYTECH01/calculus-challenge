@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { MathJaxContext } from "better-react-mathjax";
+
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import QuizPage from "./pages/QuizPage";
@@ -20,33 +20,11 @@ import QuestionPreviewPage from "./pages/QuestionPreviewPage";
 
 const queryClient = new QueryClient();
 
-// Clean MathJax configuration without conflicting macros
-const mathJaxConfig = {
-  tex: {
-    inlineMath: [
-      ["$", "$"],
-      ["\\(", "\\)"],
-    ],
-    displayMath: [
-      ["$$", "$$"],
-      ["\\[", "\\]"],
-    ],
-    processEscapes: true,
-    processEnvironments: true
-  },
-  startup: {
-    typeset: false
-  },
-  options: {
-    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-  }
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <MathJaxContext config={mathJaxConfig}>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -64,8 +42,7 @@ const App = () => (
               <Route path="/question-preview" element={<QuestionPreviewPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </MathJaxContext>
+        </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
