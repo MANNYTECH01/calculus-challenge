@@ -20,7 +20,7 @@ import QuestionPreviewPage from "./pages/QuestionPreviewPage";
 
 const queryClient = new QueryClient();
 
-// Simplified MathJax configuration that matches the HTML config
+// Clean MathJax configuration without conflicting macros
 const mathJaxConfig = {
   tex: {
     inlineMath: [
@@ -32,20 +32,7 @@ const mathJaxConfig = {
       ["\\[", "\\]"],
     ],
     processEscapes: true,
-    processEnvironments: true,
-    macros: {
-      frac: ["\\frac{#1}{#2}", 2],
-      sqrt: ["\\sqrt{#1}", 1],
-      int: "\\int",
-      sum: "\\sum",
-      lim: "\\lim",
-      sin: "\\sin",
-      cos: "\\cos",
-      tan: "\\tan",
-      log: "\\log",
-      ln: "\\ln",
-      exp: "\\exp"
-    }
+    processEnvironments: true
   },
   startup: {
     typeset: false
