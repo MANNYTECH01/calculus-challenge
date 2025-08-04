@@ -20,8 +20,11 @@ import QuestionPreviewPage from "./pages/QuestionPreviewPage";
 
 const queryClient = new QueryClient();
 
-// FIX: The configuration is placed back here with an option to prevent rendering race conditions.
+// Enhanced MathJax configuration for production compatibility
 const mathJaxConfig = {
+  loader: { 
+    load: ['[tex]/html', '[tex]/mathtools', '[tex]/amsmath', '[tex]/amsfonts', '[tex]/amssymb'] 
+  },
   tex: {
     inlineMath: [
       ["$", "$"],
@@ -31,11 +34,43 @@ const mathJaxConfig = {
       ["$$", "$$"],
       ["\\[", "\\]"],
     ],
+    packages: {'[+]': ['html', 'mathtools', 'amsmath', 'amsfonts', 'amssymb']},
+    processEscapes: true,
+    processEnvironments: true,
+    macros: {
+      RR: "\\mathbb{R}",
+      ZZ: "\\mathbb{Z}",
+      NN: "\\mathbb{N}",
+      QQ: "\\mathbb{Q}",
+      CC: "\\mathbb{C}",
+      dd: ["\\frac{d#1}{d#2}", 2],
+      pp: ["\\frac{\\partial#1}{\\partial#2}", 2],
+      int: "\\int",
+      frac: ["\\frac{#1}{#2}", 2],
+      sqrt: ["\\sqrt{#1}", 1],
+      sum: "\\sum",
+      prod: "\\prod",
+      lim: "\\lim",
+      sin: "\\sin",
+      cos: "\\cos",
+      tan: "\\tan",
+      log: "\\log",
+      ln: "\\ln",
+      exp: "\\exp"
+    }
   },
-  // This option hides the raw LaTeX code until MathJax has finished rendering it.
+  svg: {
+    fontCache: 'global'
+  },
   startup: {
-    hideUntilTypeset: "first",
+    ready: () => {
+      console.log('MathJax is loaded, but not yet initialized');
+    },
+    typeset: false
   },
+  options: {
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  }
 };
 
 const App = () => (

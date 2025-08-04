@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { MathText } from '@/components/MathRenderer';
 import { ArrowLeft, Shield, BookCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';

@@ -60,6 +60,11 @@ const QuizPage: React.FC = () => {
     }));
   }, []);
 
+  const { violations } = useAntiCheat({
+    enabled: quizStarted,
+    onForceSubmit: () => submitQuiz(true)
+  });
+
   const submitQuiz = useCallback(async (forced = false) => {
     if (isSubmitting || forceSubmitRef.current) return;
     setIsSubmitting(true);
@@ -81,10 +86,13 @@ const QuizPage: React.FC = () => {
         score,
         total_questions: questions.length,
         time_taken: timeTaken,
-        quiz_data: { questions: questions.map(q => ({ id: q.id })), userAnswers },
+        quiz_data: { 
+          questions: questions.map(q => ({ id: q.id })), 
+          userAnswers: userAnswers.map(ua => ({ questionId: ua.questionId, answer: ua.answer }))
+        } as any,
         device_fingerprint: generateDeviceFingerprint(),
         user_agent: navigator.userAgent,
-        anti_cheat_violations: violations
+        anti_cheat_violations: violations as any
       });
 
       await supabase.from('profiles').update({ has_attempted_quiz: true, quiz_completed_at: new Date().toISOString() }).eq('user_id', user?.id);
@@ -104,11 +112,6 @@ const QuizPage: React.FC = () => {
       forceSubmitRef.current = false;
     }
   }, [questions, userAnswers, timeLeft, user?.id, navigate, generateDeviceFingerprint, isSubmitting, violations]);
-
-  const { violations } = useAntiCheat({
-    enabled: quizStarted,
-    onForceSubmit: () => submitQuiz(true)
-  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -148,9 +151,13 @@ const QuizPage: React.FC = () => {
         const fetchedQuestions: Question[] = [];
 
         for (const [category, count] of Object.entries(categories)) {
-            const { data, error } = await supabase.rpc('get_random_questions_by_category', { p_category: category, p_limit: count });
+            const { data, error } = await supabase
+              .from('questions')
+              .select('*')
+              .eq('category', category)
+              .limit(count);
             if (error) throw error;
-            fetchedQuestions.push(...data);
+            if (data) fetchedQuestions.push(...data);
         }
         
         setQuestions(fetchedQuestions.sort(() => Math.random() - 0.5)); // Shuffle the final set

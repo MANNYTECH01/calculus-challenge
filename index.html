@@ -19,7 +19,53 @@
     <meta name="twitter:title" content="MTH102 – Calculus Quiz Challenge" />
     <meta name="twitter:description" content="Test your skills. Win Prizes. August 16th." />
 
-   
+    <!-- MathJax CDN for production compatibility -->
+    <script>
+      window.MathJax = {
+        loader: { 
+          load: ['[tex]/html', '[tex]/mathtools', '[tex]/amsmath', '[tex]/amsfonts', '[tex]/amssymb'] 
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          packages: {'[+]': ['html', 'mathtools', 'amsmath', 'amsfonts', 'amssymb']},
+          processEscapes: true,
+          processEnvironments: true,
+          macros: {
+            RR: "\\mathbb{R}",
+            ZZ: "\\mathbb{Z}",
+            NN: "\\mathbb{N}",
+            QQ: "\\mathbb{Q}",
+            CC: "\\mathbb{C}",
+            dd: ["\\frac{d#1}{d#2}", 2],
+            pp: ["\\frac{\\partial#1}{\\partial#2}", 2],
+            int: "\\int",
+            frac: ["\\frac{#1}{#2}", 2],
+            sqrt: ["\\sqrt{#1}", 1],
+            sum: "\\sum",
+            prod: "\\prod",
+            lim: "\\lim",
+            sin: "\\sin",
+            cos: "\\cos",
+            tan: "\\tan",
+            log: "\\log",
+            ln: "\\ln",
+            exp: "\\exp"
+          }
+        },
+        svg: {
+          fontCache: 'global'
+        },
+        startup: {
+          typeset: false
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script async src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   </head>
 
   <body>
