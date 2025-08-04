@@ -20,11 +20,8 @@ import QuestionPreviewPage from "./pages/QuestionPreviewPage";
 
 const queryClient = new QueryClient();
 
-// Enhanced MathJax configuration for production compatibility
+// Simplified MathJax configuration that matches the HTML config
 const mathJaxConfig = {
-  loader: { 
-    load: ['[tex]/html', '[tex]/mathtools', '[tex]/amsmath', '[tex]/amsfonts', '[tex]/amssymb'] 
-  },
   tex: {
     inlineMath: [
       ["$", "$"],
@@ -34,22 +31,13 @@ const mathJaxConfig = {
       ["$$", "$$"],
       ["\\[", "\\]"],
     ],
-    packages: {'[+]': ['html', 'mathtools', 'amsmath', 'amsfonts', 'amssymb']},
     processEscapes: true,
     processEnvironments: true,
     macros: {
-      RR: "\\mathbb{R}",
-      ZZ: "\\mathbb{Z}",
-      NN: "\\mathbb{N}",
-      QQ: "\\mathbb{Q}",
-      CC: "\\mathbb{C}",
-      dd: ["\\frac{d#1}{d#2}", 2],
-      pp: ["\\frac{\\partial#1}{\\partial#2}", 2],
-      int: "\\int",
       frac: ["\\frac{#1}{#2}", 2],
       sqrt: ["\\sqrt{#1}", 1],
+      int: "\\int",
       sum: "\\sum",
-      prod: "\\prod",
       lim: "\\lim",
       sin: "\\sin",
       cos: "\\cos",
@@ -59,13 +47,7 @@ const mathJaxConfig = {
       exp: "\\exp"
     }
   },
-  svg: {
-    fontCache: 'global'
-  },
   startup: {
-    ready: () => {
-      console.log('MathJax is loaded, but not yet initialized');
-    },
     typeset: false
   },
   options: {
