@@ -8,7 +8,7 @@ const AnnouncementBanner: React.FC = () => {
         🎓 MTH 102 Calculus Quiz Competition | August 16th, 2025 | Registration: ₦1000
       </div>
       <div className="text-sm md:text-base text-muted-foreground mb-4">
-        Quiz Time: 12:00 AM - 11:59 PM | Winner Announced: August 17th at 7:00 AM
+        Quiz Time: 12:00 AM - 11:59 PM | Winner Announced: August 17th at 10:00 AM
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
         <div className="flex items-center justify-center space-x-2">

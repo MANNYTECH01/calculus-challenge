@@ -218,7 +218,7 @@ const SupportChat: React.FC = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Available before, during, and after the quiz
+                  Chat support is available anytime you need us
                 </p>
               </div>
             </CardContent>

@@ -12,9 +12,9 @@ const QuizRules: React.FC = () => {
     "Copying/Right-clicking/Highlighting is disabled",
     "You have only one attempt during the quiz duration. After the quiz, you can attempt it multiple times",
     "Quiz Duration: 60 minutes (1 hour)",
-    "Correct Answers & Explanations will be released on August 17th, 2025 at 7:00 AM",
+    "Correct Answers & Explanations will be released on August 17th, 2025 at 07:00 AM",
     "Winner Announcement: August 17th, 2025 at 10:00 AM",
-    "Leaderboard will be displayed on August 17th, 2025 at 04:00 AM",
+    "Leaderboard will be displayed on August 17th, 2025 at 10:00 AM",
     "Use the chat box for any complaints or clarifications"
   ];
 
