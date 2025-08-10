@@ -5,7 +5,7 @@ import { CheckCircle } from 'lucide-react';
 const QuizRules: React.FC = () => {
   const rules = [
     "Multiple Choice Questions from Calculus (MTH 102)",
-    "Payment of ₦1000 is required to register for the quiz",
+    "Payment of ₦500 is required to register for the quiz",
     "No Pausing or Restarting once the quiz is started",
     "Tab Switching during the quiz will auto-submit your attempt",
     "Screenshots will be detected; any attempt will result in disqualification",

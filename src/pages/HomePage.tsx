@@ -125,7 +125,7 @@ const HomePage: React.FC = () => {
           <Card className="text-center bg-gradient-to-br from-warning/10 to-primary/10 border-warning/20">
             <CardContent className="p-6">
               <Trophy className="h-8 w-8 mx-auto mb-2 text-warning" />
-              <div className="text-2xl font-bold text-foreground">₦50k</div>
+              <div className="text-2xl font-bold text-foreground">₦20k</div>
               <div className="text-sm text-muted-foreground">Total Prizes</div>
             </CardContent>
           </Card>
@@ -160,14 +160,14 @@ const HomePage: React.FC = () => {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">
-                Register and pay ₦1000 to participate in the quiz
+                Register and pay ₦500 to participate in the quiz
               </p>
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
                 onClick={() => navigate('/auth')}
               >
-                Register & Pay ₦1000
+                Register & Pay ₦500
               </Button>
             </div>
           )}

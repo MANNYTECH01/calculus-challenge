@@ -13,7 +13,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Shield, MessageSquare, Users, AlertTriangle, Send, Upload, RotateCcw, Eye, PlayCircle, Reply, BookOpen } from 'lucide-react';
 import { MathText } from '@/components/MathRenderer';
 import AdminMobileNavigation from '@/components/AdminMobileNavigation';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
+// Define interfaces for all data types for clarity and type safety
 interface User {
   id: string;
   email: string;
@@ -51,6 +53,7 @@ interface Question {
   correct_answer: string;
   difficulty_level: string;
   category: string;
+  explanation?: string; // Correctly marked as optional
 }
 
 interface QuizAttempt {
@@ -137,8 +140,8 @@ const AdminPage: React.FC = () => {
       const transformedAttempts = attemptsData?.map((a: any) => ({ ...a, profiles: { username: a.profiles?.username || 'Anonymous' } })) || [];
       setQuizAttempts(transformedAttempts);
 
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to load admin data.", variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Error", description: `Failed to load admin data: ${error.message}`, variant: "destructive" });
     }
   };
 
@@ -161,20 +164,20 @@ const AdminPage: React.FC = () => {
       setMessageSubject('');
       setMessageContent('');
       setScreenshotFile(null);
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to send message.", variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Error", description: `Failed to send message: ${error.message}`, variant: "destructive" });
     }
   };
 
   const resetUserQuiz = async (userId: string, username: string) => {
     try {
-      await supabase.from('profiles').update({ has_attempted_quiz: false, quiz_completed_at: null }).eq('user_id', userId);
+      await supabase.from('profiles').update({ has_attempted_quiz: false, quiz_completed_at: null }).eq('id', userId);
       await supabase.from('quiz_attempts').delete().eq('user_id', userId);
       await supabase.from('quiz_violations').delete().eq('user_id', userId);
       toast({ title: "Success", description: `Quiz attempt reset for ${username}.` });
       await loadData();
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to reset quiz attempt.", variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Error", description: `Failed to reset quiz attempt: ${error.message}`, variant: "destructive" });
     }
   };
 
@@ -188,14 +191,14 @@ const AdminPage: React.FC = () => {
       setReplyingTo(null);
       setReplyMessage('');
       await loadData();
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to send reply.", variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Error", description: `Failed to send reply: ${error.message}`, variant: "destructive" });
     }
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
@@ -240,6 +243,7 @@ const AdminPage: React.FC = () => {
               </button>
             ))}
           </div>
+
           {activeTab === 'users' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
@@ -253,7 +257,7 @@ const AdminPage: React.FC = () => {
                           <div className="text-sm text-muted-foreground">{user.email}</div>
                           {user.quiz_completed_at && <div className="text-xs text-muted-foreground">Completed: {new Date(user.quiz_completed_at).toLocaleDateString()}</div>}
                         </div>
-                        <div className="flex flex-col space-y-2">
+                        <div className="flex flex-col items-end space-y-2">
                           <div className="flex space-x-2">
                             <Badge variant={user.payment_verified ? "default" : "destructive"}>{user.payment_verified ? "Paid" : "Unpaid"}</Badge>
                             <Badge variant={user.has_attempted_quiz ? "secondary" : "outline"}>{user.has_attempted_quiz ? "Attempted" : "Pending"}</Badge>
@@ -294,6 +298,7 @@ const AdminPage: React.FC = () => {
               </Card>
             </div>
           )}
+
           {activeTab === 'messages' && (
             <Card>
               <CardHeader><CardTitle className="flex items-center space-x-2"><MessageSquare className="h-5 w-5" /><span>Support Messages ({supportMessages.length})</span></CardTitle></CardHeader>
@@ -322,6 +327,7 @@ const AdminPage: React.FC = () => {
               </CardContent>
             </Card>
           )}
+
           {activeTab === 'violations' && (
             <Card>
               <CardHeader><CardTitle className="flex items-center space-x-2"><Shield className="h-5 w-5" /><span>Quiz Violations ({violations.length})</span></CardTitle></CardHeader>
@@ -341,24 +347,84 @@ const AdminPage: React.FC = () => {
               </CardContent>
             </Card>
           )}
+
           {activeTab === 'quiz' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
-                <CardHeader><CardTitle className="flex items-center space-x-2"><BookOpen className="h-5 w-5" /><span>Quiz Questions ({questions.length})</span></CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BookOpen className="h-5 w-5" />
+                    <span>Quiz Questions & Answers ({questions.length})</span>
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {questions.map((q, i) => <div key={q.id} className="p-3 border rounded-lg"><div className="font-medium text-sm mb-1">Question {i+1}</div><div className="text-sm text-muted-foreground line-clamp-2"><MathText>{q.question_text}</MathText></div><div className="flex space-x-2 mt-2"><Badge variant="outline" className="text-xs">{q.difficulty_level}</Badge><Badge variant="outline" className="text-xs">{q.category}</Badge></div></div>)}
-                  </div>
+                  <Accordion type="single" collapsible className="w-full max-h-[600px] overflow-y-auto pr-2">
+                    {questions.map((q, index) => (
+                      <AccordionItem key={q.id} value={`item-${index}`}>
+                        <AccordionTrigger className="text-lg font-semibold text-left">
+                          <span className="mr-4">{index + 1}.</span>
+                          <MathText>{q.question_text}</MathText>
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-4 pt-4">
+                          <ul className="space-y-2">
+                            {[
+                              { key: 'A', text: q.option_a },
+                              { key: 'B', text: q.option_b },
+                              { key: 'C', text: q.option_c },
+                              { key: 'D', text: q.option_d },
+                            ].map((option) => (
+                              <li
+                                key={option.key}
+                                className={`p-3 rounded-md text-sm ${
+                                  option.key === q.correct_answer
+                                    ? 'bg-green-100 dark:bg-green-900/40 border-l-4 border-green-500'
+                                    : 'bg-muted/50'
+                                }`}
+                              >
+                                <span className="font-bold">{option.key}.</span>{' '}
+                                <MathText>{option.text}</MathText>
+                                {option.key === q.correct_answer && (
+                                  <Badge className="ml-3 bg-green-600">Correct Answer</Badge>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                          {q.explanation && (
+                            <div className="p-4 bg-sky-50 dark:bg-sky-900/20 border-l-4 border-sky-500 rounded-r-lg">
+                              <h4 className="font-bold text-sky-800 dark:text-sky-300">Explanation</h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                <MathText>{q.explanation}</MathText>
+                              </p>
+                            </div>
+                          )}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardHeader><CardTitle className="flex items-center space-x-2"><Eye className="h-5 w-5" /><span>Quiz Preview</span></CardTitle></CardHeader>
                 <CardContent>
-                  {questions.length > 0 && <div className="space-y-4"><div className="flex items-center justify-between"><span className="text-sm font-medium">Question {previewQuestionIndex+1} of {questions.length}</span><div className="flex space-x-2"><Button size="sm" variant="outline" onClick={()=>setPreviewQuestionIndex(p=>Math.max(0,p-1))} disabled={previewQuestionIndex===0}>Prev</Button><Button size="sm" variant="outline" onClick={()=>setPreviewQuestionIndex(p=>Math.min(questions.length-1, p+1))} disabled={previewQuestionIndex>=questions.length-1}>Next</Button></div></div>{questions[previewQuestionIndex]&&(<div className="space-y-4"><div className="p-4 bg-muted/50 rounded-lg"><MathText>{questions[previewQuestionIndex].question_text}</MathText></div><div className="grid grid-cols-1 gap-2">{['A','B','C','D'].map(o=><div key={o} className={`p-3 rounded-lg border cursor-pointer ${previewAnswers[questions[previewQuestionIndex].id]===o?'border-primary bg-primary/10':o===questions[previewQuestionIndex].correct_answer?'border-green-500 bg-green-50 dark:bg-green-950':'border-muted hover:bg-muted/50'}`} onClick={()=>setPreviewAnswers(p=>({...p,[questions[previewQuestionIndex].id]:o}))}><div className="flex items-center space-x-2"><span className="font-semibold">{o}.</span><MathText>{questions[previewQuestionIndex][`option_${o.toLowerCase() as 'a'}`]}</MathText>{o===questions[previewQuestionIndex].correct_answer&&<span className="ml-auto text-green-600 text-sm font-medium">✓ Correct</span>}</div></div>)}</div></div>)}</div>}
+                  {questions.length > 0 && <div className="space-y-4"><div className="flex items-center justify-between"><span className="text-sm font-medium">Question {previewQuestionIndex+1} of {questions.length}</span><div className="flex space-x-2"><Button size="sm" variant="outline" onClick={()=>setPreviewQuestionIndex(p=>Math.max(0,p-1))} disabled={previewQuestionIndex===0}>Prev</Button><Button size="sm" variant="outline" onClick={()=>setPreviewQuestionIndex(p=>Math.min(questions.length-1, p+1))} disabled={previewQuestionIndex>=questions.length-1}>Next</Button></div></div>{questions[previewQuestionIndex]&&(<div className="space-y-4"><div className="p-4 bg-muted/50 rounded-lg"><MathText>{questions[previewQuestionIndex].question_text}</MathText></div><div className="grid grid-cols-1 gap-2">{['A','B','C','D'].map(o=><div key={o} className={`p-3 rounded-lg border cursor-pointer ${previewAnswers[questions[previewQuestionIndex].id]===o?'border-primary bg-primary/10':o===questions[previewQuestionIndex].correct_answer?'border-green-500 bg-green-50 dark:bg-green-950':'border-muted hover:bg-muted/50'}`} onClick={()=>setPreviewAnswers(p=>({...p,[questions[previewQuestionIndex].id]:o}))}><div className="flex items-center space-x-2"><span className="font-semibold">{o}.</span><MathText>{questions[previewQuestionIndex][`option_${o.toLowerCase() as 'a'}`]}</MathText>{o===questions[previewQuestionIndex].correct_answer&&<span className="ml-auto text-green-600 text-sm font-medium">✓ Correct</span>}</div></div>)}</div>
+                  
+                  {/* FIX: Explanation added to the Quiz Preview section */}
+                  {questions[previewQuestionIndex].explanation && (
+                    <div className="mt-4 p-4 bg-sky-50 dark:bg-sky-900/20 border-l-4 border-sky-500 rounded-r-lg">
+                      <h4 className="font-bold text-sky-800 dark:text-sky-300">Explanation</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        <MathText>{questions[previewQuestionIndex].explanation}</MathText>
+                      </p>
+                    </div>
+                  )}
+
+                  </div>)}</div>}
                 </CardContent>
               </Card>
             </div>
           )}
+
           {activeTab === 'attempts' && (
             <Card>
               <CardHeader><CardTitle className="flex items-center space-x-2"><PlayCircle className="h-5 w-5" /><span>Quiz Attempts ({quizAttempts.length})</span></CardTitle></CardHeader>

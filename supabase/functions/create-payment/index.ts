@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: { "Authorization": `Bearer ${paystackSecretKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ email, amount: 100000, currency: "NGN", reference, callback_url: `${req.headers.get("origin")}/auth?payment=success&reference=${reference}` }),
+      body: JSON.stringify({ email, amount: 50000, currency: "NGN", reference, callback_url: `${req.headers.get("origin")}/auth?payment=success&reference=${reference}` }),
     });
     const paystackData = await paystackResponse.json();
     if (!paystackData.status) throw new Error(paystackData.message);

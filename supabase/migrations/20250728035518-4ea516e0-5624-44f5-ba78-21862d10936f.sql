@@ -39,11 +39,11 @@ CREATE TABLE public.prize_structure (
 
 -- Insert prize structure
 INSERT INTO public.prize_structure (position, prize_amount, prize_description) VALUES
-(1, 2000000, '₦20,000'), -- stored in kobo
-(2, 1500000, '₦15,000'),
-(3, 1000000, '₦10,000'),
-(4, 300000, '₦3,000'),
-(5, 200000, '₦2,000');
+(1, 2000000, '₦10,000'), -- stored in kobo
+(2, 1500000, '₦5,000'),
+(3, 1000000, '₦3,000'),
+(4, 300000, '₦1,000'),
+(5, 200000, '₦1,000');
 
 -- Enable RLS on prize_structure
 ALTER TABLE public.prize_structure ENABLE ROW LEVEL SECURITY;
