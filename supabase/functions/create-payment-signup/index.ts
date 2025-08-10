@@ -18,12 +18,27 @@ Deno.serve(async (req) => {
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: { "Authorization": `Bearer ${paystackSecretKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ email, amount: 50000, reference, currency: "NGN", callback_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/verify-payment-and-signup`, metadata: { username, location: location || "Not specified" } }),
+      body: JSON.stringify({
+        email,
+        amount: 50000, // Paystack expects amount in kobo (₦500)
+        reference,
+        currency: "NGN",
+        callback_url: `${Deno.env.get("FRONTEND_URL")}/payment-success`,
+        metadata: { username, location: location || "Not specified" }
+      }),
     });
     const paystackData = await paystackResponse.json();
     if (!paystackData.status) throw new Error(paystackData.message);
 
-    await supabaseAdmin.from("payment_sessions").insert({ user_email: email, paystack_reference: reference, paystack_access_code: paystackData.data.access_code, amount: 1000, currency: "ngn", status: "pending" });
+    await supabaseAdmin.from("payment_sessions").insert({
+      user_email: email,
+      paystack_reference: reference,
+      paystack_access_code: paystackData.data.access_code,
+      amount: 500,
+      currency: "ngn",
+      status: "pending",
+      signup_data: { email, username, location: location || "Not specified" }
+    });
 
     return new Response(JSON.stringify({ authorization_url: paystackData.data.authorization_url, access_code: paystackData.data.access_code, reference }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
