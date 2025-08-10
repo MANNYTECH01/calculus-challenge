@@ -45,16 +45,25 @@ const PaymentSuccessPage: React.FC = () => {
           if (error) throw error;
 
           if (data?.verified && data?.user_created) {
-            localStorage.removeItem('pending_signup');
             setSuccess(true);
             toast({
               title: "Account Created Successfully!",
-              description: "Your payment has been verified and your account is ready. You can now sign in.",
+              description: "You're being logged in automatically...",
             });
-            
-            setTimeout(() => {
+
+            try {
+              const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: signupData.email,
+                password: signupData.password,
+              });
+              if (signInError) throw signInError;
+              localStorage.removeItem('pending_signup');
+              navigate('/dashboard');
+            } catch (e: any) {
+              localStorage.removeItem('pending_signup');
+              toast({ title: 'Auto-login failed', description: e.message || 'Please sign in manually.', variant: 'destructive' });
               navigate('/auth?tab=signin&message=account-created');
-            }, 3000);
+            }
           } else {
             throw new Error(data?.message || 'Payment verification failed');
           }

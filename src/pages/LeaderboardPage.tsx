@@ -28,8 +28,8 @@ const LeaderboardPage: React.FC = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        // Check if it's after August 17th, 2025 at 1:00 AM UTC
-        const releaseDate = new Date('2025-08-17T10:00:00Z');
+        // Check if it's after August 17th, 2025 at 9:00 AM UTC (10:00 AM WAT)
+        const releaseDate = new Date('2025-08-17T09:00:00Z');
         const now = new Date();
         
         if (now < releaseDate) {

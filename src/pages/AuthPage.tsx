@@ -117,6 +117,19 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!signInForm.email) {
+      toast({ title: 'Enter your email', description: 'Please enter your email to reset your password.' });
+      return;
+    }
+    try {
+      await supabase.auth.resetPasswordForEmail(signInForm.email, { redirectTo: `${window.location.origin}/auth` });
+      toast({ title: 'Password reset email sent', description: 'Check your inbox for the reset link.' });
+    } catch (error: any) {
+      toast({ title: 'Reset failed', description: error.message || 'Please try again later.', variant: 'destructive' });
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -298,6 +311,9 @@ const AuthPage: React.FC = () => {
                     onChange={(e) => setSignInForm(prev => ({ ...prev, password: e.target.value }))}
                     required
                   />
+                </div>
+                <div className="flex justify-end -mt-2 mb-2">
+                  <Button type="button" variant="link" onClick={handleResetPassword} className="px-0">Forgot password?</Button>
                 </div>
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}

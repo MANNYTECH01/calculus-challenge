@@ -50,7 +50,7 @@ const QuizReviewPage: React.FC = () => {
       return;
     }
     
-    const reviewReleaseDate = new Date('2025-08-17T07:00:00Z');
+    const reviewReleaseDate = new Date('2025-08-17T06:00:00Z');
     const now = new Date();
 
     if (now >= reviewReleaseDate) {
