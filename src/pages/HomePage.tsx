@@ -160,14 +160,14 @@ const HomePage: React.FC = () => {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">
-                Register and pay ₦500 to participate in the quiz
+                Register and pay ₦1000 to participate in the quiz
               </p>
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
                 onClick={() => navigate('/auth')}
               >
-                Register & Pay ₦500
+                Register & Pay ₦1000
               </Button>
             </div>
           )}

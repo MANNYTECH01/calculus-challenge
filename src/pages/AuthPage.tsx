@@ -104,7 +104,7 @@ const AuthPage: React.FC = () => {
           await supabase.auth.signOut();
           toast({
             title: "Payment Required",
-            description: "Please complete your ₦500 payment to access the portal.",
+            description: "Please complete your ₦1000 payment to access the portal.",
             variant: "destructive",
           });
           return;
@@ -169,7 +169,7 @@ const AuthPage: React.FC = () => {
 
         toast({
           title: "Redirecting to Payment",
-          description: "You'll be redirected to Paystack to complete your ₦500 payment. After payment, your account will be created and verified automatically.",
+          description: "You'll be redirected to Paystack to complete your ₦1000 payment. After payment, your account will be created and verified automatically.",
         });
 
         // Redirect to Paystack
@@ -213,7 +213,7 @@ const AuthPage: React.FC = () => {
         
         toast({
           title: "Redirecting to Payment",
-          description: "Complete your ₦500 registration fee via Paystack. After payment, check your email for confirmation link.",
+          description: "Complete your ₦1000 registration fee via Paystack. After payment, check your email for confirmation link.",
         });
       }
     } catch (error) {
@@ -280,7 +280,7 @@ const AuthPage: React.FC = () => {
             MTH 102 Quiz Portal
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Registration requires ₦500 payment
+            Registration requires ₦1000 payment
           </p>
         </CardHeader>
         <CardContent>
@@ -367,7 +367,7 @@ const AuthPage: React.FC = () => {
                 
                 <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
                   <div className="text-sm text-warning font-semibold mb-1">
-                    Registration Fee: ₦500
+                    Registration Fee: ₦1000
                   </div>
                   <div className="text-xs text-muted-foreground">
                     After creating your account, you'll be redirected to pay the registration fee via Paystack (secure payment platform).
@@ -376,7 +376,7 @@ const AuthPage: React.FC = () => {
                 
                 <Button type="submit" className="w-full" disabled={isSubmitting || paymentProcessing}>
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Sign Up & Pay ₦500
+                  Sign Up & Pay ₦1000
                 </Button>
               </form>
             </TabsContent>
