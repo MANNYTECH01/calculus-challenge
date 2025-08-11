@@ -16,7 +16,7 @@ const WhatsAppIcon: React.FC = () => (
 );
 
 const WhatsAppButton: React.FC = () => {
-  const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/your-group-invite-link"; 
+  const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/L3buyLeEsGXF8YNhKlFC65"; 
 
   return (
     <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer">

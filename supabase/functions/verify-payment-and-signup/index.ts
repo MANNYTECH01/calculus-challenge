@@ -22,7 +22,7 @@ serve(async (req)=>{
       }
     });
     // Initialize Paystack
-    const paystackSecretKey = Deno.env.get("REACT_APP_PAYSTACK_SECRET_KEY");
+    const paystackSecretKey = Deno.env.get("SECRET_KEY");
     if (!paystackSecretKey) {
       throw new Error("Paystack secret key not configured");
     }

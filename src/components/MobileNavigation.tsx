@@ -27,7 +27,7 @@ const MobileNavigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   // --- IMPORTANT: Replace this with your actual WhatsApp group invite link ---
-  const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/your-group-invite-link";
+  const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/L3buyLeEsGXF8YNhKlFC65";
 
   const handleNavigation = (path: string) => {
     navigate(path);
