@@ -370,7 +370,7 @@ const AuthPage: React.FC = () => {
                     Registration Fee: ₦1000
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    After creating your account, you'll be redirected to pay the registration fee via Paystack (secure payment platform).
+                    After creating your account, you'll be redirected to pay the registration fee via Paystack.
                   </div>
                 </div>
                 
