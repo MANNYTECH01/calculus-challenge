@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, User, CreditCard, Clock, Trophy, MessageCircle, CheckCircle2 } from 'lucide-react';
 import MobileNavigation from '@/components/MobileNavigation';
+import WhatsAppButton from '@/components/ui/whatsapp-icon';
 
 interface UserProfile {
   id: string;
@@ -181,9 +182,10 @@ const DashboardPage: React.FC = () => {
               Dashboard
             </h1>
           </div>
-          
-          {/* Desktop Navigation */}
+
+          {/* THIS IS THE BLOCK YOU REPLACE */}
           <div className="hidden lg:flex items-center space-x-4">
+            <WhatsAppButton />
             <Button variant="outline" onClick={() => navigate('/')}>
               Back to Home
             </Button>
