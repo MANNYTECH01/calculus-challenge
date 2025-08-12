@@ -120,7 +120,7 @@ const QuizPage: React.FC = () => {
         return;
       }
 
-      const quizStartDate = new Date('2025-08-16T00:00:00Z');
+      const quizStartDate = new Date('2025-08-10T00:00:00Z');
       const quizEndDate = new Date('2025-08-16T23:59:59Z');
       const now = new Date();
 
@@ -134,7 +134,7 @@ const QuizPage: React.FC = () => {
         const { data: profileData, error: profileError } = await supabase.from('profiles').select('has_attempted_quiz, payment_verified').eq('user_id', user.id).single();
         if (profileError) throw profileError;
 
-        if (profileData.has_attempted_quiz) {
+        if (!profileData.has_attempted_quiz) {
           setHasAttempted(true);
           setIsLoading(false);
           return;
