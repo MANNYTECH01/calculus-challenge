@@ -147,7 +147,7 @@ const QuizPage: React.FC = () => {
         }
 
         // Fetch questions based on categories
-        const categories = { functions: 5, limits: 7, differentiation: 14, integration: 12, applications: 2 };
+        const categories = { functions: 3, limits: 7, differentiation: 16, integration: 13, applications: 1 };
         const fetchedQuestions: Question[] = [];
 
         for (const [category, count] of Object.entries(categories)) {
