@@ -17,7 +17,7 @@ const HomePage: React.FC = () => {
   const [quizAvailable, setQuizAvailable] = useState(false);
 
   // Quiz date - set to a future date
-  const quizDate = new Date('2025-08-10T00:00:00');
+  const quizDate = new Date('2025-08-16T00:00:00');
   useEffect(() => {
     const now = new Date();
     setQuizAvailable(now >= quizDate);
