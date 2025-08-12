@@ -134,7 +134,7 @@ const QuizPage: React.FC = () => {
         const { data: profileData, error: profileError } = await supabase.from('profiles').select('has_attempted_quiz, payment_verified').eq('user_id', user.id).single();
         if (profileError) throw profileError;
 
-        if (!profileData.has_attempted_quiz) {
+        if (profileData.has_attempted_quiz) {
           setHasAttempted(true);
           setIsLoading(false);
           return;

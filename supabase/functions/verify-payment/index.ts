@@ -11,18 +11,16 @@ serve(async (req)=>{
     });
   }
   try {
-    const { reference, email } = await req.json();
-    if (!reference || !email) {
-      throw new Error("Reference and email are required");
+    const { reference } = await req.json(); // We only need the reference from the client
+    if (!reference) {
+      throw new Error("Payment reference is required");
     }
-    // Create Supabase client with service role key
     const supabaseClient = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", {
       auth: {
         persistSession: false
       }
     });
-    // Initialize Paystack
-    const paystackSecretKey = Deno.env.get("SECRET_KEY");
+    const paystackSecretKey = Deno.env.get("SECRET_KEY"); // Using standardized name
     if (!paystackSecretKey) {
       throw new Error("Paystack secret key not configured");
     }
@@ -36,10 +34,15 @@ serve(async (req)=>{
     });
     const verifyData = await verifyResponse.json();
     if (verifyData.status && verifyData.data.status === "success") {
+      // Get email directly from Paystack's response
+      const email = verifyData.data.customer.email;
+      if (!email) {
+        throw new Error("Could not retrieve customer email from Paystack transaction.");
+      }
       // Update payment session status
       await supabaseClient.from("payment_sessions").update({
         status: "completed"
-      }).eq("paystack_reference", reference).eq("user_email", email);
+      }).eq("paystack_reference", reference);
       // Get user ID from email
       const { data: userData } = await supabaseClient.auth.admin.getUserByEmail(email);
       if (userData.user) {
@@ -47,6 +50,9 @@ serve(async (req)=>{
         await supabaseClient.from("profiles").update({
           payment_verified: true
         }).eq("user_id", userData.user.id);
+      } else {
+        // This case might happen if the webhook hasn't created the user yet
+        console.warn(`User with email ${email} not found, webhook will handle profile update.`);
       }
       return new Response(JSON.stringify({
         verified: true
@@ -66,7 +72,7 @@ serve(async (req)=>{
           ...corsHeaders,
           "Content-Type": "application/json"
         },
-        status: 200
+        status: 400
       });
     }
   } catch (error) {

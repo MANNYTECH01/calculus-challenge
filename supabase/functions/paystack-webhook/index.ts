@@ -22,10 +22,16 @@ serve(async (req)=>{
       throw new Error("No signature found");
     }
     const body = await req.text();
-    const hash = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(paystackSecretKey + body));
-    const expectedSignature = Array.from(new Uint8Array(hash)).map((b)=>b.toString(16).padStart(2, '0')).join('');
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(paystackSecretKey), {
+      name: "HMAC",
+      hash: "SHA-512"
+    }, false, [
+      "sign"
+    ]);
+    const signatureBytes = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body));
+    const expectedSignature = Array.from(new Uint8Array(signatureBytes)).map((b)=>b.toString(16).padStart(2, "0")).join("");
     if (signature !== expectedSignature) {
-      throw new Error("Invalid signature");
+      throw new Error("Invalid Paystack signature");
     }
     const event = JSON.parse(body);
     // Create Supabase client with service role key

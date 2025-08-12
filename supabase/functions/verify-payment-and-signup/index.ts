@@ -65,13 +65,18 @@ serve(async (req)=>{
       status: "completed"
     }).eq("paystack_reference", reference).eq("user_email", email);
     // Create user profile with payment verified
-    await supabaseAdmin.from("profiles").insert({
-      user_id: signUpData.user.id,
-      username,
+    const { error: profileError } = await supabaseAdmin.from("profiles").update({
+      payment_verified: true,
+      // You can also update other details here if needed
+      username: username,
       full_name: username,
-      location: location || "Not specified",
-      payment_verified: true
-    });
+      location: location || "Not specified"
+    }).eq("user_id", signUpData.user.id);
+    if (profileError) {
+      // If the update fails, log it for debugging
+      console.error('Error updating profile:', profileError);
+      throw new Error(`User profile update failed: ${profileError.message}`);
+    }
     return new Response(JSON.stringify({
       verified: true,
       user_created: true,

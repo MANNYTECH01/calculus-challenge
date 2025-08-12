@@ -40,7 +40,7 @@ serve(async (req)=>{
         amount: 100000,
         reference,
         currency: "NGN",
-        callback_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/verify-payment-and-signup`,
+        callback_url: `${Deno.env.get("FRONTEND_URL")}/payment/success`,
         metadata: {
           username,
           location: location || "Not specified"
