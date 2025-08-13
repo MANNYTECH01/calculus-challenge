@@ -53,7 +53,13 @@ const QuizReviewPage: React.FC = () => {
   const fetchQuizData = async () => {
     if (!user) return;
     try {
-      const { data: attemptData, error: attemptError } = await supabase.from('quiz_attempts').select('*').eq('user_id', user.id).single();
+      const { data: attemptData, error: attemptError } = await supabase
+      .from('quiz_attempts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('submitted_at', { ascending: false }) // Get the most recent attempt first
+      .limit(1) // Ensure we only get one row
+      .single();
       if (attemptError && attemptError.code !== 'PGRST116') throw attemptError;
       if (!attemptData) { setLoading(false); return; }
       setQuizAttempt(attemptData);
