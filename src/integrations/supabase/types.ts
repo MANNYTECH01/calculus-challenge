@@ -399,6 +399,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_show_explanations: {
+        Args: { p_user_id?: string }
+        Returns: boolean
+      }
       get_admin_user_details: {
         Args: Record<PropertyKey, never>
         Returns: {
