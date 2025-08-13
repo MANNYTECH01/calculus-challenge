@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MathText } from '@/components/MathRenderer';
-import { ArrowLeft, Shield, BookCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
+import { ArrowLeft, BookCheck } from 'lucide-react';
+import { MathText } from '@/components/MathRenderer';
+import ExplanationRenderer from '@/components/ExplanationRenderer';
+import { useExplanationSettings } from '@/hooks/useExplanationSettings';
 
 interface Question {
   id: string;
@@ -22,36 +22,15 @@ interface Question {
 }
 
 const QuestionPreviewPage: React.FC = () => {
-  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { canViewExplanations } = useExplanationSettings();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [explanations, setExplanations] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (authLoading) return;
-
-    const checkAdminAndFetchData = async () => {
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-
+    const fetchData = async () => {
       try {
-        const { data: adminData } = await supabase
-          .from('admin_panel')
-          .select('is_admin')
-          .eq('user_id', user.id)
-          .single();
-
-        if (!adminData?.is_admin) {
-          toast({ title: "Access Denied", description: "You do not have permission to view this page.", variant: "destructive" });
-          navigate('/');
-          return;
-        }
-        setIsAdmin(true);
-
         // Securely call the Edge Function to get all data
         const { data, error } = await supabase.functions.invoke('get-all-questions-and-explanations');
         
@@ -74,23 +53,11 @@ const QuestionPreviewPage: React.FC = () => {
       }
     };
 
-    checkAdminAndFetchData();
-  }, [user, authLoading, navigate]);
+    fetchData();
+  }, []);
 
-  if (loading || authLoading) {
-    return <div className="text-center p-8">Verifying Admin Access and Loading Data...</div>;
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-          <Card className="max-w-md mx-auto text-center p-8">
-            <Shield className="h-12 w-12 mx-auto text-destructive mb-4" />
-            <h2 className="text-2xl font-bold">Access Denied</h2>
-            <p className="text-muted-foreground mt-2">You must be an administrator to view this page.</p>
-          </Card>
-      </div>
-    );
+  if (loading) {
+    return <div className="text-center p-8">Loading Data...</div>;
   }
 
   return (
@@ -111,7 +78,6 @@ const QuestionPreviewPage: React.FC = () => {
                     <span className="pr-4">
                       <MathText>{`Question ${index + 1}: ${question.question_text}`}</MathText>
                     </span>
-                    <Badge variant="outline">{question.category}</Badge>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -132,7 +98,17 @@ const QuestionPreviewPage: React.FC = () => {
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="pt-2 text-sm text-muted-foreground">
-                      <MathText>{explanations[question.id] || "No explanation available."}</MathText>
+                      {canViewExplanations ? (
+                        <ExplanationRenderer 
+                          explanation={explanations[question.id] || "No explanation available."} 
+                        />
+                      ) : (
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900/20 border-l-4 border-gray-400 rounded-r-lg">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Explanations are currently not available for viewing.
+                          </p>
+                        </div>
+                      )}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>

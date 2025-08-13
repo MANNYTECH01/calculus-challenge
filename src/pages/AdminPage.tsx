@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Shield, MessageSquare, Users, AlertTriangle, Send, Upload, RotateCcw, Eye, PlayCircle, Reply, BookOpen } from 'lucide-react';
+import { Shield, MessageSquare, Users, AlertTriangle, Send, Upload, RotateCcw, Eye, PlayCircle, Reply, BookOpen, Settings } from 'lucide-react';
 import { MathText } from '@/components/MathRenderer';
+import ExplanationRenderer from '@/components/ExplanationRenderer';
+import ExplanationToggle from '@/components/ExplanationToggle';
 import AdminMobileNavigation from '@/components/AdminMobileNavigation';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -82,7 +84,7 @@ const AdminPage: React.FC = () => {
   const [messageSubject, setMessageSubject] = useState('');
   const [messageContent, setMessageContent] = useState('');
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'messages' | 'violations' | 'quiz' | 'attempts'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'messages' | 'violations' | 'quiz' | 'attempts' | 'settings'>('users');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [previewQuestionIndex, setPreviewQuestionIndex] = useState(0);
@@ -225,7 +227,7 @@ const AdminPage: React.FC = () => {
           <div className="hidden lg:flex items-center space-x-4">
             <Button variant="outline" onClick={() => navigate('/')}>Back to Home</Button>
           </div>
-          <AdminMobileNavigation setActiveTab={setActiveTab} />
+          <AdminMobileNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">
@@ -236,7 +238,8 @@ const AdminPage: React.FC = () => {
               { key: 'messages', label: 'Support Messages', icon: MessageSquare },
               { key: 'violations', label: 'Violations', icon: AlertTriangle },
               { key: 'quiz', label: 'Quiz Management', icon: BookOpen },
-              { key: 'attempts', label: 'Quiz Attempts', icon: PlayCircle },
+              { key: 'attempts', label: 'Quiz Attempts', icon: Eye },
+              { key: 'settings', label: 'Explanation Settings', icon: Settings },
             ].map(({ key, label, icon: Icon }) => (
               <button key={key} onClick={() => setActiveTab(key as any)} className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${activeTab === key ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}>
                 <Icon className="h-4 w-4" /><span className="text-sm font-medium">{label}</span>
@@ -390,12 +393,10 @@ const AdminPage: React.FC = () => {
                             ))}
                           </ul>
                           {q.explanation && (
-                            <div className="p-4 bg-sky-50 dark:bg-sky-900/20 border-l-4 border-sky-500 rounded-r-lg">
-                              <h4 className="font-bold text-sky-800 dark:text-sky-300">Explanation</h4>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                <MathText>{q.explanation}</MathText>
-                              </p>
-                            </div>
+                            <ExplanationRenderer 
+                              explanation={q.explanation} 
+                              className="" 
+                            />
                           )}
                         </AccordionContent>
                       </AccordionItem>
@@ -409,14 +410,12 @@ const AdminPage: React.FC = () => {
                 <CardContent>
                   {questions.length > 0 && <div className="space-y-4"><div className="flex items-center justify-between"><span className="text-sm font-medium">Question {previewQuestionIndex+1} of {questions.length}</span><div className="flex space-x-2"><Button size="sm" variant="outline" onClick={()=>setPreviewQuestionIndex(p=>Math.max(0,p-1))} disabled={previewQuestionIndex===0}>Prev</Button><Button size="sm" variant="outline" onClick={()=>setPreviewQuestionIndex(p=>Math.min(questions.length-1, p+1))} disabled={previewQuestionIndex>=questions.length-1}>Next</Button></div></div>{questions[previewQuestionIndex]&&(<div className="space-y-4"><div className="p-4 bg-muted/50 rounded-lg"><MathText>{questions[previewQuestionIndex].question_text}</MathText></div><div className="grid grid-cols-1 gap-2">{['A','B','C','D'].map(o=><div key={o} className={`p-3 rounded-lg border cursor-pointer ${previewAnswers[questions[previewQuestionIndex].id]===o?'border-primary bg-primary/10':o===questions[previewQuestionIndex].correct_answer?'border-green-500 bg-green-50 dark:bg-green-950':'border-muted hover:bg-muted/50'}`} onClick={()=>setPreviewAnswers(p=>({...p,[questions[previewQuestionIndex].id]:o}))}><div className="flex items-center space-x-2"><span className="font-semibold">{o}.</span><MathText>{questions[previewQuestionIndex][`option_${o.toLowerCase() as 'a'}`]}</MathText>{o===questions[previewQuestionIndex].correct_answer&&<span className="ml-auto text-green-600 text-sm font-medium">✓ Correct</span>}</div></div>)}</div>
                   
-                  {/* FIX: Explanation added to the Quiz Preview section */}
+                  {/* Explanation Display */}
                   {questions[previewQuestionIndex].explanation && (
-                    <div className="mt-4 p-4 bg-sky-50 dark:bg-sky-900/20 border-l-4 border-sky-500 rounded-r-lg">
-                      <h4 className="font-bold text-sky-800 dark:text-sky-300">Explanation</h4>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        <MathText>{questions[previewQuestionIndex].explanation}</MathText>
-                      </p>
-                    </div>
+                    <ExplanationRenderer 
+                      explanation={questions[previewQuestionIndex].explanation} 
+                      className="mt-4" 
+                    />
                   )}
 
                   </div>)}</div>}
@@ -434,7 +433,12 @@ const AdminPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          )}
+              )}
+
+              {/* Explanation Settings Tab */}
+              {activeTab === 'settings' && (
+                <ExplanationToggle />
+              )}
         </div>
       </main>
     </div>

@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, X, Users, MessageSquare, Shield, BookOpen, PlayCircle, LogOut } from 'lucide-react';
+import { Menu, X, Users, MessageSquare, AlertTriangle, BookOpen, Eye, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AdminMobileNavigationProps {
-  setActiveTab: (tab: 'users' | 'messages' | 'violations' | 'quiz' | 'attempts') => void;
+  activeTab: 'users' | 'messages' | 'violations' | 'quiz' | 'attempts' | 'settings';
+  setActiveTab: (tab: 'users' | 'messages' | 'violations' | 'quiz' | 'attempts' | 'settings') => void;
 }
 
-const AdminMobileNavigation: React.FC<AdminMobileNavigationProps> = ({ setActiveTab }) => {
+const AdminMobileNavigation: React.FC<AdminMobileNavigationProps> = ({ activeTab, setActiveTab }) => {
   const { signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleNavigation = (tab: 'users' | 'messages' | 'violations' | 'quiz' | 'attempts') => {
+  const handleNavigation = (tab: 'users' | 'messages' | 'violations' | 'quiz' | 'attempts' | 'settings') => {
     setActiveTab(tab);
     setIsOpen(false);
   };
@@ -39,7 +40,7 @@ const AdminMobileNavigation: React.FC<AdminMobileNavigationProps> = ({ setActive
               <span>Support Messages</span>
             </Button>
             <Button variant="ghost" className="w-full justify-start space-x-3" onClick={() => handleNavigation('violations')}>
-              <Shield className="h-5 w-5" />
+              <AlertTriangle className="h-5 w-5" />
               <span>Violations</span>
             </Button>
             <Button variant="ghost" className="w-full justify-start space-x-3" onClick={() => handleNavigation('quiz')}>
@@ -47,8 +48,13 @@ const AdminMobileNavigation: React.FC<AdminMobileNavigationProps> = ({ setActive
               <span>Quiz Management</span>
             </Button>
             <Button variant="ghost" className="w-full justify-start space-x-3" onClick={() => handleNavigation('attempts')}>
-              <PlayCircle className="h-5 w-5" />
+              <Eye className="h-5 w-5" />
               <span>Quiz Attempts</span>
+            </Button>
+            
+            <Button variant="ghost" className="w-full justify-start space-x-3" onClick={() => handleNavigation('settings')}>
+              <Settings className="h-5 w-5" />
+              <span>Explanation Settings</span>
             </Button>
           </div>
           <div className="p-4 border-t">

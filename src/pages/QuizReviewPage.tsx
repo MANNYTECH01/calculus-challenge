@@ -3,11 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
+import { useExplanationSettings } from '@/hooks/useExplanationSettings';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, BookOpen } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, BookOpen, EyeOff } from 'lucide-react';
 import { MathText } from '@/components/MathRenderer';
+import ExplanationRenderer from '@/components/ExplanationRenderer';
 import MobileNavigation from '@/components/MobileNavigation';
 
 interface Question {
@@ -33,10 +35,10 @@ interface QuizAttempt {
 const QuizReviewPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { canViewExplanations, loading: settingsLoading } = useExplanationSettings();
   const [quizAttempt, setQuizAttempt] = useState<QuizAttempt | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [canViewReview, setCanViewReview] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -44,8 +46,7 @@ const QuizReviewPage: React.FC = () => {
       return;
     }
     
-    // Allow immediate access to quiz review after completion
-    setCanViewReview(true);
+    // Always allow access to quiz review page - explanation visibility is controlled separately
     fetchQuizData();
   }, [user, navigate]);
 
@@ -92,7 +93,7 @@ const QuizReviewPage: React.FC = () => {
     return question?.correct_answer === getUserAnswer(questionId);
   };
 
-  if (loading) {
+  if (loading || settingsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -103,25 +104,6 @@ const QuizReviewPage: React.FC = () => {
     );
   }
 
-  if (!canViewReview) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-xl md:text-2xl font-bold">Quiz Review</h1>
-            <Button variant="outline" onClick={() => navigate('/')}>Back to Home</Button>
-          </div>
-        </header>
-        <div className="container mx-auto px-4 py-16">
-          <Card className="max-w-2xl mx-auto text-center p-8">
-            <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Review Not Available Yet</h3>
-            <p className="text-muted-foreground">Answers and explanations will be released on August 17th, 2025 at 7:00 AM.</p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   if (!quizAttempt) {
     return (
@@ -168,6 +150,21 @@ const QuizReviewPage: React.FC = () => {
           </div>
         </div>
       </header>
+      
+      {/* Explanation Access Notice */}
+      {!canViewExplanations && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+              <EyeOff className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Explanations are currently hidden. Check back later or contact admin.
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <main className="container mx-auto px-4 py-8 space-y-8">
         <Card>
           <CardHeader><CardTitle>Your Results</CardTitle></CardHeader>
@@ -231,12 +228,21 @@ const QuizReviewPage: React.FC = () => {
                       );
                     })}
                   </div>
-                  {question.explanation && (
-                    <div className="p-4 bg-sky-50 dark:bg-sky-900/20 border-l-4 border-sky-500 rounded-r-lg mt-4">
-                      <h4 className="font-bold text-sky-800 dark:text-sky-300 flex items-center gap-2"><BookOpen className="h-4 w-4" />Explanation:</h4>
-                      <div className="text-sm text-muted-foreground mt-2 pl-6">
-                        <MathText>{question.explanation}</MathText>
+                  {canViewExplanations && question.explanation && (
+                    <ExplanationRenderer 
+                      explanation={question.explanation} 
+                      className="mt-4" 
+                    />
+                  )}
+                  {!canViewExplanations && question.explanation && (
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900/20 border-l-4 border-gray-400 rounded-r-lg mt-4">
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                        <EyeOff className="h-4 w-4" />
+                        <span className="text-sm font-medium">Explanation Hidden</span>
                       </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        Explanations are not currently available for viewing.
+                      </p>
                     </div>
                   )}
                 </CardContent>
