@@ -113,6 +113,15 @@ const MobileNavigation: React.FC = () => {
                 <Button
                   variant="ghost"
                   className="w-full justify-start space-x-3"
+                  onClick={() => handleNavigation('/quiz-review')}
+                >
+                  <BookOpen className="h-5 w-5" />
+                  <span>Quiz Review</span>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start space-x-3"
                   onClick={() => handleNavigation('/messages')}
                 >
                   <MessageCircle className="h-5 w-5" />

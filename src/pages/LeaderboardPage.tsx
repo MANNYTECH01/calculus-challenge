@@ -28,15 +28,7 @@ const LeaderboardPage: React.FC = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        // Check if it's after August 17th, 2025 at 9:00 AM UTC (10:00 AM WAT)
-        const releaseDate = new Date('2025-08-11T09:00:00Z');
-        const now = new Date();
-        
-        if (now < releaseDate) {
-          setLeaderboard([]);
-          setLoading(false);
-          return;
-        }
+        // Show leaderboard immediately - no date restrictions
 
         const { data, error } = await supabase
           .from('quiz_attempts')
@@ -142,9 +134,7 @@ const LeaderboardPage: React.FC = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             MTH 102 Calculus Quiz Competition - August 16th, 2025
             <br />
-            Leaderboard available from August 17th, 2025 at 10:00 AM
-            <br />
-            Winner will be announced on August 17th, 2025 at 10:00 AM
+            Real-time leaderboard showing top performers
           </p>
         </div>
 
@@ -155,11 +145,11 @@ const LeaderboardPage: React.FC = () => {
               <CardContent className="py-12">
                 <div className="text-center">
                   <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Leaderboard Coming Soon</h3>
+                  <h3 className="text-xl font-semibold mb-2">No Quiz Attempts Yet</h3>
                   <p className="text-muted-foreground">
-                    The leaderboard will be displayed publicly on August 17th, 2025 at 10:00 AM.
+                    Be the first to complete the quiz and appear on the leaderboard!
                     <br />
-                    Complete the quiz to compete for the top positions!
+                    Your ranking will appear here immediately after completing the quiz.
                   </p>
                 </div>
               </CardContent>

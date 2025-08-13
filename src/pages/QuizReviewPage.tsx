@@ -44,16 +44,9 @@ const QuizReviewPage: React.FC = () => {
       return;
     }
     
-    const reviewReleaseDate = new Date('2025-08-17T06:00:00Z'); // 7:00 AM WAT
-    const now = new Date();
-
-    if (now >= reviewReleaseDate) {
-      setCanViewReview(true);
-      fetchQuizData();
-    } else {
-      setCanViewReview(false);
-      setLoading(false);
-    }
+    // Allow immediate access to quiz review after completion
+    setCanViewReview(true);
+    fetchQuizData();
   }, [user, navigate]);
 
   const fetchQuizData = async () => {
