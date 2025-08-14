@@ -45,8 +45,6 @@ const QuizReviewPage: React.FC = () => {
       navigate('/auth');
       return;
     }
-    
-    // Always allow access to quiz review page - explanation visibility is controlled separately
     fetchQuizData();
   }, [user, navigate]);
 
@@ -54,27 +52,33 @@ const QuizReviewPage: React.FC = () => {
     if (!user) return;
     try {
       const { data: attemptData, error: attemptError } = await supabase
-      .from('quiz_attempts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('submitted_at', { ascending: false }) // Get the most recent attempt first
-      .limit(1) // Ensure we only get one row
-      .single();
+        .from('quiz_attempts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('submitted_at', { ascending: false }) // Fetch the most recent attempt
+        .limit(1)
+        .single();
+
       if (attemptError && attemptError.code !== 'PGRST116') throw attemptError;
-      if (!attemptData) { setLoading(false); return; }
+      if (!attemptData) {
+        setLoading(false);
+        return;
+      }
       setQuizAttempt(attemptData);
-      
+
       const questionIds = (attemptData.quiz_data as any)?.questions?.map((q: any) => q.id) || [];
-      if (questionIds.length === 0) { setLoading(false); return; }
+      if (questionIds.length === 0) {
+        setLoading(false);
+        return;
+      }
 
       const { data: questionsData, error: questionsError } = await supabase.from('questions').select('*').in('id', questionIds);
       if (questionsError) throw questionsError;
-      
+
       const questionMap = new Map(questionsData.map(q => [q.id, q]));
       const sortedQuestions = questionIds.map((id: string) => questionMap.get(id)).filter(Boolean);
 
       setQuestions(sortedQuestions as Question[]);
-
     } catch (error) {
       toast({ title: "Error", description: "Failed to load quiz data", variant: "destructive" });
     } finally {
@@ -110,22 +114,21 @@ const QuizReviewPage: React.FC = () => {
     );
   }
 
-
   if (!quizAttempt) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-         <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-xl md:text-2xl font-bold">Quiz Review</h1>
             <Button variant="outline" onClick={() => navigate('/')}>Back to Home</Button>
           </div>
         </header>
         <div className="container mx-auto px-4 py-16">
-        <Card className="max-w-2xl mx-auto text-center p-8">
-          <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold">No Quiz Attempt Found</h2>
-          <p className="text-muted-foreground mt-2">You haven't attempted the quiz yet. Once you do, you can review it here after the review period begins.</p>
-        </Card>
+          <Card className="max-w-2xl mx-auto text-center p-8">
+            <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold">No Quiz Attempt Found</h2>
+            <p className="text-muted-foreground mt-2">You haven't attempted the quiz yet. Once you do, you can review it here after the review period begins.</p>
+          </Card>
         </div>
       </div>
     );
@@ -138,18 +141,18 @@ const QuizReviewPage: React.FC = () => {
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => navigate('/')}
-                className="lg:hidden"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <h1 className="text-xl md:text-2xl font-bold">Quiz Review</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              className="lg:hidden"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-xl md:text-2xl font-bold">Quiz Review</h1>
           </div>
           <div className="hidden lg:flex">
-             <Button variant="outline" onClick={() => navigate('/')}>Back to Home</Button>
+            <Button variant="outline" onClick={() => navigate('/')}>Back to Home</Button>
           </div>
           <div className="lg:hidden">
             <MobileNavigation />
@@ -157,7 +160,6 @@ const QuizReviewPage: React.FC = () => {
         </div>
       </header>
       
-      {/* Explanation Access Notice */}
       {!canViewExplanations && (
         <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
           <div className="container mx-auto px-4 py-3">
@@ -176,19 +178,19 @@ const QuizReviewPage: React.FC = () => {
           <CardHeader><CardTitle>Your Results</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <p className="text-3xl font-bold text-primary">{percentage}%</p>
+              <p className="text-2xl md:text-3xl font-bold text-primary">{percentage}%</p>
               <p className="text-sm text-muted-foreground">Final Score</p>
             </div>
             <div>
-              <p className="text-3xl font-bold">{quizAttempt.score}/{quizAttempt.total_questions}</p>
+              <p className="text-2xl md:text-3xl font-bold">{quizAttempt.score}/{quizAttempt.total_questions}</p>
               <p className="text-sm text-muted-foreground">Correct</p>
             </div>
             <div>
-              <p className="text-3xl font-bold">{formatTime(quizAttempt.time_taken)}</p>
+              <p className="text-2xl md:text-3xl font-bold">{formatTime(quizAttempt.time_taken)}</p>
               <p className="text-sm text-muted-foreground">Time Taken</p>
             </div>
             <div>
-              <p className="text-3xl font-bold">{new Date(quizAttempt.submitted_at).toLocaleDateString()}</p>
+              <p className="text-2xl md:text-3xl font-bold">{new Date(quizAttempt.submitted_at).toLocaleDateString()}</p>
               <p className="text-sm text-muted-foreground">Date Taken</p>
             </div>
           </CardContent>
@@ -202,12 +204,12 @@ const QuizReviewPage: React.FC = () => {
               <Card key={question.id} className={`border-l-4 ${correct ? 'border-green-500' : 'border-red-500'}`}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">Question {index + 1}</CardTitle>
+                    <CardTitle className="text-lg flex-1">Question {index + 1}</CardTitle>
                     <Badge variant={correct ? "default" : "destructive"}>{correct ? "Correct" : "Incorrect"}</Badge>
                   </div>
+                   <div className="p-2 bg-muted/50 rounded-lg mt-2"><MathText>{question.question_text}</MathText></div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-muted/50 rounded-lg"><MathText>{question.question_text}</MathText></div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {['A', 'B', 'C', 'D'].map(opt => {
                       const optionKey = `option_${opt.toLowerCase() as 'a' | 'b' | 'c' | 'd'}`;
