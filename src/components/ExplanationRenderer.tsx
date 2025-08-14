@@ -72,8 +72,11 @@ export const ExplanationRenderer: React.FC<ExplanationRendererProps> = ({
     );
   }
 
-  // Split explanation by newline characters and render each line separately
-  const explanationLines = explanation.split('\n').filter(line => line.trim() !== '');
+  // **THE DEFINITIVE FIX IS HERE**
+  // We split the explanation string by the LITERAL string "\\n".
+  // The double backslash is crucial. It tells JavaScript to look for a
+  // literal backslash followed by an 'n', which is what is being rendered.
+  const explanationLines = explanation.split('\\n');
 
   return (
     <div className={`p-4 bg-sky-50 dark:bg-sky-900/20 border-l-4 border-sky-500 rounded-r-lg ${className}`}>
@@ -81,10 +84,14 @@ export const ExplanationRenderer: React.FC<ExplanationRendererProps> = ({
         <BookOpen className="h-4 w-4" />
         Explanation
       </h4>
-      <div className="text-sm text-muted-foreground pl-6 space-y-2">
-        {explanationLines.map((line, index) => (
-          <MathText key={index}>{line}</MathText>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="text-sm text-muted-foreground pl-6">
+          {explanationLines.map((line, index) => (
+            <div key={index}>
+              <MathText>{line}</MathText>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

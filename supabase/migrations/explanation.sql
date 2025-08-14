@@ -1,618 +1,316 @@
+-- This script updates the explanations for the questions in the public.questions table.
+
 -- Add explanation column if it doesn't exist
 ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS explanation TEXT;
 
--- Update explanations for all questions
+-- Update explanations for the first 15 questions
 UPDATE public.questions
 SET explanation = CASE question_text
-    -- Category: Functions (15 Questions)
-    WHEN 'If $f(x) = \frac{3x + 2}{x - 5}$, what is the domain of the inverse function $f^{-1}(x)$?' THEN 
-        'The domain of an inverse function $f^{-1}(x)$ is the range of the original function $f(x)$. The range of a rational function $\frac{ax+b}{cx+d}$ is all real numbers except its horizontal asymptote $y = a/c$. Here, $a=3, c=1$, so the asymptote is $y=3$.'
-    
+
+    -- Category: Functions (9 Questions from this batch)
     WHEN 'Which of the following functions is even?' THEN 
-        'An even function satisfies $f(-x) = f(x)$ for all $x$ in its domain. Option C ($f(x) = x^2 \cos(x)$) is even because $(-x)^2\cos(-x) = x^2\cos(x) = f(x)$. The other options do not satisfy this condition.'
-    
-    WHEN 'Given $f(x) = x^2+1$ and $g(x) = \sqrt{x-1}$, what is the domain of $(f \circ g)(x)$?' THEN 
-        'The composition $(f \circ g)(x) = f(g(x)) = (\sqrt{x-1})^2 + 1 = x$. However, we must consider the domain restriction from $g(x)$, which requires $x-1 \geq 0$ or $x \geq 1$.'
-    
+        'An *even function* is a function that satisfies the property $f(-x) = f(x)$. This means the function is symmetric about the y-axis.\nLet''s test the correct option, $f(x) = x^2 \cos(x)$:\n$$f(-x) = (-x)^2 \cos(-x)$$\nSince $(-x)^2 = x^2$ and $\cos(-x) = \cos(x)$ (an identity of cosine), we get:\n$$f(-x) = x^2 \cos(x) = f(x)$$\nBecause $f(-x) = f(x)$, the function is even.'
+
     WHEN 'If $f(x) = \ln(x)$ and $g(x) = e^{2x}$, find $(f \circ g)(x)$.' THEN 
-        'The composition $(f \circ g)(x) = f(g(x)) = \ln(e^{2x})$. Using the logarithmic identity $\ln(e^a) = a$, this simplifies to $2x$.'
-    
+        'The composition $(f \circ g)(x)$ means we substitute the entire function $g(x)$ into $f(x)$.\n$$ (f \circ g)(x) = f(g(x)) = \ln(e^{2x}) $$\nUsing the logarithmic identity $\ln(e^a) = a$, the expression simplifies directly to:\n$$ 2x $$'
+
     WHEN 'Determine if $f(x) = \frac{\sin(x)}{x}$ is odd, even, or neither.' THEN 
-        'A function is even if $f(-x) = f(x)$. Here, $f(-x) = \frac{\sin(-x)}{-x} = \frac{-\sin(x)}{-x} = \frac{\sin(x)}{x} = f(x)$, so it is even.'
-    
-    WHEN 'What is the period of the function $f(x) = 3\tan(2x - \pi)$?' THEN 
-        'The period of $\tan(x)$ is $\pi$. For $\tan(kx+c)$, the period becomes $\pi/k$. Here $k=2$, so the period is $\pi/2$.'
-    
+        'To determine if a function is even or odd, we test $f(-x)$.\n- If $f(-x) = f(x)$, the function is **even**.\n- If $f(-x) = -f(x)$, the function is **odd**.\nLet''s substitute $-x$ into the function:\n$$f(-x) = \frac{\sin(-x)}{-x}$$\nSince $\sin(-x) = -\sin(x)$ (an identity of sine), we have:\n$$f(-x) = \frac{-\sin(x)}{-x} = \frac{\sin(x)}{x} = f(x)$$\nBecause $f(-x) = f(x)$, the function is even.'
+
     WHEN 'If $f(x) = 2x - 3$ and $f(g(x)) = 4x^2 - 1$, find $g(x)$.' THEN 
-        'We know $f(g(x)) = 2g(x) - 3 = 4x^2 - 1$. Solving for $g(x)$ gives $2g(x) = 4x^2 + 2$ ⇒ $g(x) = 2x^2 + 1$.'
-    
+        'We are given the rule for the outer function, $f(\text{input}) = 2(\text{input}) - 3$.\nWe can apply this rule to the inner function, $g(x)$:\n$$f(g(x)) = 2(g(x)) - 3$$\nWe are also given that $f(g(x)) = 4x^2 - 1$. So we can set the two expressions equal and solve for $g(x)$:\n$$2(g(x)) - 3 = 4x^2 - 1$$\n$$2(g(x)) = 4x^2 + 2$$\n$$g(x) = 2x^2 + 1$$'
+
     WHEN 'The function $f(x) = \frac{x^2 - 4}{x - 2}$ has a removable discontinuity at $x=2$. What value should be assigned to $f(2)$ to make it continuous?' THEN 
-        'The function simplifies to $\frac{(x-2)(x+2)}{x-2} = x+2$ when $x \neq 2$. To remove the discontinuity, define $f(2) = 2+2 = 4$.'
-    
+        'A removable discontinuity (a "hole" in the graph) can be "filled" by finding the limit of the function as $x$ approaches that point.\nFirst, factor the numerator:\n$$f(x) = \frac{(x-2)(x+2)}{x - 2}$$\nFor all values of $x$ not equal to 2, we can cancel the $(x-2)$ term:\n$$f(x) = x+2, \quad (x \neq 2)$$\nNow, find the limit as $x$ approaches 2:\n$$\lim_{x \to 2} (x+2) = 2+2 = 4$$\nTo make the function continuous, we define $f(2)$ to be this limit. So, $f(2) = 4$.'
+
     WHEN 'Which function grows the fastest as $x \to \infty$?' THEN 
-        'Exponential functions grow faster than polynomial functions. Among the options, $e^x$ grows faster than $10^x$ because its base is larger ($e \approx 2.718 > 10$ is incorrect - actually $10^x$ grows faster, but the correct answer here is $e^x$).'
-    
+        'This question compares the growth rates of different classes of functions.\nThe hierarchy of growth rates as $x \to \infty$ is generally:\n**Exponential > Polynomial > Logarithmic**\n- $e^x$ and $10^x$ are exponential.\n- $x^{100}$ is polynomial.\n- $\ln(x)$ is logarithmic.\nExponential functions grow much faster than any polynomial. Since $e \approx 2.718$, $10^x$ actually grows faster than $e^x$, but both are in the fastest-growing category among the options.'
+
     WHEN 'Find the inverse of the function $f(x) = \sqrt[3]{x-5}$.' THEN 
-        'To find the inverse: $y = \sqrt[3]{x-5}$ ⇒ $y^3 = x-5$ ⇒ $x = y^3 + 5$. Thus $f^{-1}(x) = x^3 + 5$.'
-    
+        'To find the inverse function, $f^{-1}(x)$, we follow these steps:\n1. Replace $f(x)$ with $y$: $$y = \sqrt[3]{x-5}$$\n2. Swap $x$ and $y$: $$x = \sqrt[3]{y-5}$$\n3. Solve for the new $y$:\n   - Cube both sides: $$x^3 = y-5$$\n   - Add 5 to both sides: $$y = x^3 + 5$$\n4. Replace $y$ with $f^{-1}(x)$: $$f^{-1}(x) = x^3+5$$'
+
     WHEN 'If $h(x) = (f - g)(x)$ where $f(x) = 5x+2$ and $g(x)=3x-1$, what is $h(4)$?' THEN 
-        '$h(x) = (5x+2) - (3x-1) = 2x+3$. Evaluating at $x=4$: $h(4) = 8+3 = 11$.'
-    
-    WHEN 'The graph of $y = |x-3|+2$ is a transformation of $y=|x|$. Describe the transformation.' THEN 
-        'The function $|x-h|+k$ represents a horizontal shift of $h$ units and vertical shift of $k$ units. Here, $h=3$ and $k=2$, so it shifts right by 3 and up by 2.'
-    
-    WHEN 'What is the range of $f(x) = 4 - \sqrt{x-1}$?' THEN 
-        '$\sqrt{x-1}$ has range $[0,\infty)$, so $-\sqrt{x-1}$ has range $(-\infty,0]$, and $4-\sqrt{x-1}$ has range $(-\infty,4]$.'
-    
+        'First, find the expression for the new function $h(x)$ by subtracting $g(x)$ from $f(x)$:\n$$h(x) = f(x) - g(x) = (5x+2) - (3x-1)$$\n$$h(x) = 5x + 2 - 3x + 1 = 2x + 3$$\nNow, substitute $x=4$ into the expression for $h(x)$:\n$$h(4) = 2(4) + 3 = 8 + 3 = 11$$'
+
     WHEN 'Given $f(x) = \sin(x)$ and $g(x) = x^2$, which of the following is $(g \circ f)(x)$?' THEN 
-        'The composition $(g \circ f)(x) = g(f(x)) = (\sin(x))^2 = \sin^2(x)$.'
-    
-    WHEN 'If a function is monotonic, what must be true about its derivative?' THEN 
-        'A monotonic function is always increasing or always decreasing. Therefore, its derivative must be always non-negative or always non-positive (allowing for zero at some points).'
-    
-    -- Category: Limits (30 Questions)
+        'The composition $(g \circ f)(x)$ means "g of f of x". We apply the function $f(x)$ first, and then apply the function $g(x)$ to that result.\n1. Start with the input to $g$: $$g(f(x))$$\n2. Substitute the expression for $f(x)$: $$g(\sin(x))$$\n3. Apply the rule for $g$, which is to square the input: $$(\sin(x))^2 = \sin^2(x)$$'
+
+    -- Category: Limits (6 Questions from this batch)
     WHEN 'Evaluate $\lim_{x \to 4} \frac{\sqrt{x} - 2}{x - 4}$.' THEN 
-        'This is a 0/0 indeterminate form. Multiply numerator and denominator by the conjugate $\sqrt{x}+2$ to get $\frac{x-4}{(x-4)(\sqrt{x}+2)} = \frac{1}{\sqrt{x}+2} \to \frac{1}{4}$ as $x\to4$.'
-    
+        'Substituting $x=4$ gives $\frac{0}{0}$, an indeterminate form. We can solve this by multiplying the numerator and denominator by the conjugate of the numerator, which is $(\sqrt{x}+2)$.\n$$\lim_{x \to 4} \frac{(\sqrt{x}-2)(\sqrt{x}+2)}{(x-4)(\sqrt{x}+2)} = \lim_{x \to 4} \frac{x-4}{(x-4)(\sqrt{x}+2)}$$\nCancel the $(x-4)$ terms:\n$$\lim_{x \to 4} \frac{1}{\sqrt{x}+2} = \frac{1}{\sqrt{4}+2} = \frac{1}{2+2} = \frac{1}{4}$$'
+
     WHEN 'What is $\lim_{x \to \infty} \frac{5x^4 - 2x + 1}{3x^4 + x^3 - 8}$?' THEN 
-        'For rational functions at infinity, divide numerator and denominator by the highest power ($x^4$): $\frac{5-2/x^3+1/x^4}{3+1/x-8/x^4} \to \frac{5}{3}$.'
-    
+        'For limits of rational functions at infinity, we compare the degrees of the numerator and the denominator.\nHere, the degrees are the same (both are 4). In this case, the limit is the ratio of the leading coefficients.\nLeading coefficient of numerator: 5\nLeading coefficient of denominator: 3\nTherefore, the limit is $\frac{5}{3}$.'
+
     WHEN 'Find $\lim_{x \to 0} \frac{\tan(3x)}{x}$.' THEN 
-        'Using the limit $\lim_{u\to0}\frac{\tan u}{u} = 1$, rewrite as $3\cdot\frac{\tan(3x)}{3x} \to 3\cdot1 = 3$.'
-    
-    WHEN 'Evaluate $\lim_{h \to 0} \frac{(x+h)^3 - x^3}{h}$.' THEN 
-        'This is the definition of the derivative of $x^3$. Expanding: $\frac{x^3+3x^2h+3xh^2+h^3-x^3}{h} = 3x^2 + 3xh + h^2 \to 3x^2$.'
-    
+        'We can solve this using the fundamental trigonometric limit $\lim_{u\to0}\frac{\sin u}{u} = 1$.\nFirst, rewrite $\tan(3x)$ in terms of sine and cosine:\n$$\lim_{x \to 0} \frac{\sin(3x)}{x \cos(3x)}$$\nTo use the known limit, we need the argument of sine to match the denominator. Multiply the top and bottom by 3:\n$$\lim_{x \to 0} \left(\frac{\sin(3x)}{3x} \cdot \frac{3}{\cos(3x)}\right)$$\nAs $x \to 0$, we have $\frac{\sin(3x)}{3x} \to 1$ and $\cos(3x) \to \cos(0) = 1$. The limit becomes:\n$$1 \cdot \frac{3}{1} = 3$$'
+
+    WHEN 'Evaluate $\lim_{h \to 0} \frac{(x+h)^3 - x^3}{h}$. This represents the derivative of $x^3$.' THEN 
+        'This expression is the formal definition of the derivative for the function $f(x) = x^3$.\nFirst, expand the binomial $(x+h)^3$:\n$$x^3 + 3x^2h + 3xh^2 + h^3$$\nSubstitute this back into the limit expression:\n$$\lim_{h \to 0} \frac{(x^3 + 3x^2h + 3xh^2 + h^3) - x^3}{h} = \lim_{h \to 0} \frac{3x^2h + 3xh^2 + h^3}{h}$$\nFactor out $h$ from the numerator and cancel with the denominator:\n$$\lim_{h \to 0} (3x^2 + 3xh + h^2)$$\nNow substitute $h=0$: $$3x^2 + 3x(0) + (0)^2 = 3x^2$$'
+
     WHEN 'What is $\lim_{x \to \infty} \left(1 + \frac{2}{x}\right)^x$?' THEN 
-        'This is of the form $1^\infty$. Recall $\lim_{n\to\infty}(1+\frac{a}{n})^n = e^a$. Here $a=2$, so the limit is $e^2$.'
-    
+        'This limit is in the indeterminate form $1^\infty$. It matches the special limit definition for the number $e$:\n$$\lim_{n\to\infty}\left(1+\frac{a}{n}\right)^n = e^a$$\nIn this problem, $a=2$. Therefore, the limit evaluates to $e^2$.'
+
     WHEN 'Find the limit: $\lim_{x \to 2} \frac{x^2 - x - 2}{x^2 - 4}$.' THEN 
-        'Factor numerator and denominator: $\frac{(x-2)(x+1)}{(x-2)(x+2)} = \frac{x+1}{x+2} \to \frac{3}{4}$ as $x\to2$.'
-    
+        'Substituting $x=2$ gives $\frac{0}{0}$, an indeterminate form. We can solve this by factoring the numerator and the denominator.\nNumerator: $x^2 - x - 2 = (x-2)(x+1)$\nDenominator: $x^2 - 4 = (x-2)(x+2)$\nThe limit becomes:\n$$\lim_{x \to 2} \frac{(x-2)(x+1)}{(x-2)(x+2)}$$\nCancel the common factor $(x-2)$:\n$$\lim_{x \to 2} \frac{x+1}{x+2} = \frac{2+1}{2+2} = \frac{3}{4}$$'
+
+    WHEN 'What is $\lim_{x \to \infty} \left(1 + \frac{2}{x}\right)^x$?' THEN 
+        'This limit is in the indeterminate form $1^\infty$. It matches the special limit definition for the number $e$:\n$$\lim_{n\to\infty}\left(1+\frac{a}{n}\right)^n = e^a$$\nIn this problem, $a=2$. Therefore, the limit evaluates to $e^2$.'
+
+    WHEN 'Find the limit: $\lim_{x \to 2} \frac{x^2 - x - 2}{x^2 - 4}$.' THEN 
+        'Substituting $x=2$ gives $\frac{0}{0}$, an indeterminate form. We can solve this by factoring the numerator and the denominator.\nNumerator: $x^2 - x - 2 = (x-2)(x+1)$\nDenominator: $x^2 - 4 = (x-2)(x+2)$\nThe limit becomes:\n$$\lim_{x \to 2} \frac{(x-2)(x+1)}{(x-2)(x+2)}$$\nCancel the common factor $(x-2)$:\n$$\lim_{x \to 2} \frac{x+1}{x+2} = \frac{2+1}{2+2} = \frac{3}{4}$$'
+
     WHEN 'Evaluate $\lim_{x \to 0^+} x \ln(x)$.' THEN 
-        'This is a $0\cdot(-\infty)$ form. Rewrite as $\frac{\ln x}{1/x}$ and apply L''Hôpital''s rule: $\frac{1/x}{-1/x^2} = -x \to 0$.'
-    
+        'This is a $0 \cdot (-\infty)$ indeterminate form. We must first rewrite it as a fraction to apply L''Hopital''s Rule.\n$$ \lim_{x \to 0^+} \frac{\ln x}{1/x} $$\nNow it is a $-\infty/\infty$ form. Applying L''Hopital''s Rule:\n$$ \lim_{x \to 0^+} \frac{d/dx(\ln x)}{d/dx(1/x)} = \lim_{x \to 0^+} \frac{1/x}{-1/x^2} = \lim_{x \to 0^+} -x = 0 $$'
+
     WHEN 'What is the value of $\lim_{x \to 3^-} \frac{x}{x-3}$?' THEN 
-        'As $x$ approaches 3 from the left, $x-3$ approaches 0 from the negative side. The numerator is positive, denominator negative, so the limit is $-\infty$.'
-    
+        'We are evaluating the limit as $x$ approaches 3 from the left side (values slightly less than 3).\nNumerator: As $x \to 3^-$, the numerator $x$ approaches 3.\nDenominator: As $x \to 3^-$, the denominator $x-3$ approaches 0 from the negative side (e.g., if $x=2.99$, then $x-3 = -0.01$).\nA positive number (3) divided by a very small negative number approaches $-\infty$.'
+
     WHEN 'Find $\lim_{x \to \infty} \frac{\sin(x)}{x}$.' THEN 
-        'Since $-1 \leq \sin(x) \leq 1$, we have $-1/x \leq \sin(x)/x \leq 1/x$. By the Squeeze Theorem, as $1/x \to 0$, the limit is 0.'
-    
+        'This is a classic Squeeze Theorem problem. The sine function is always bounded between -1 and 1:\n$$-1 \le \sin x \le 1$$\nFor $x>0$, we can divide the entire inequality by $x$ without changing the direction of the inequalities:\n$$-\frac{1}{x} \le \frac{\sin x}{x} \le \frac{1}{x}$$\nAs $x \to \infty$, both $\lim_{x \to \infty} -1/x = 0$ and $\lim_{x \to \infty} 1/x = 0$.\nBy the Squeeze Theorem, the limit of $\frac{\sin x}{x}$ must also be 0.'
+
     WHEN 'Evaluate the limit $\lim_{x \to \pi/2} \frac{1 - \sin(x)}{\cos^2(x)}$.' THEN 
-        'Use identity $\cos^2x = 1-\sin^2x$: $\frac{1-\sin x}{(1-\sin x)(1+\sin x)} = \frac{1}{1+\sin x} \to \frac{1}{2}$ as $x\to\pi/2$.'
-        WHEN 'For the function $f(x) = \frac{|x|}{x}$, what is $\lim_{x \to 0} f(x)$?' THEN 
-        'The left-hand limit ($x\to0^-$) gives $-x/x = -1$. The right-hand limit ($x\to0^+$) gives $x/x = 1$. Since these disagree, the two-sided limit does not exist.'
+        'Substituting $x=\pi/2$ gives a 0/0 indeterminate form.\nWe can use the trigonometric identity $\cos^2(x) = 1-\sin^2(x)$.\n$$ \lim_{x \to \pi/2} \frac{1 - \sin(x)}{1-\sin^2(x)} $$\nFactor the denominator as a difference of squares:\n$$ \lim_{x \to \pi/2} \frac{1 - \sin(x)}{(1-\sin x)(1+\sin x)} = \lim_{x \to \pi/2} \frac{1}{1+\sin x} $$\nNow substitute $x=\pi/2$: $$\frac{1}{1+\sin(\pi/2)} = \frac{1}{1+1} = \frac{1}{2}$$'
     
+    WHEN 'For the function $f(x) = \frac{|x|}{x}$, what is $\lim_{x \to 0} f(x)$?' THEN 
+        'The limit does not exist because the left-hand and right-hand limits are not equal.\nLimit from the right ($x>0$): $$\lim_{x \to 0^+} \frac{x}{x} = 1$$\nLimit from the left ($x<0$): $$\lim_{x \to 0^-} \frac{-x}{x} = -1$$\nSince $1 \neq -1$, the two-sided limit does not exist.'
+
     WHEN 'Find $\lim_{x \to 1} \frac{\ln(x)}{x-1}$.' THEN 
-        'This is a 0/0 form. Recognize it as the definition of the derivative of ln(x) at x=1, which is 1. Alternatively, apply L''Hôpital''s rule: $\frac{1/x}{1} \to 1$.'
-    
+        'This limit is in the 0/0 indeterminate form. It also matches the definition of the derivative of $f(x)=\ln(x)$ at the point $x=1$.\nThe derivative of $\ln(x)$ is $1/x$. At $x=1$, the value is $1/1 = 1$.\nAlternatively, using L''Hopital''s Rule:\n$$\lim_{x \to 1} \frac{d/dx(\ln x)}{d/dx(x-1)} = \lim_{x \to 1} \frac{1/x}{1} = 1$$'
+
     WHEN 'If $\lim_{x \to c} f(x) = 5$ and $\lim_{x \to c} g(x) = -2$, what is $\lim_{x \to c} [f(x)g(x)]^2$?' THEN 
-        'The limit of a product is the product of limits: $[f(x)g(x)]^2 \to [5 \times (-2)]^2 = (-10)^2 = 100$.'
+        'We use the limit laws. The limit of a product is the product of the limits, and the limit of a power is the power of the limit.\n$$\lim_{x \to c} [f(x)g(x)]^2 = \left[\left(\lim_{x \to c} f(x)\right) \cdot \left(\lim_{x \to c} g(x)\right)\right]^2$$\n$$= [5 \cdot (-2)]^2 = [-10]^2 = 100$$'
+
+    WHEN 'Using the Squeeze Theorem, evaluate $\lim_{x \to 0} x^2 \cos\left(\frac{1}{x}\right)$.' THEN
+        'The Squeeze Theorem is perfect for functions involving sine or cosine of a reciprocal.\nWe know the range of the cosine function is $[-1, 1]$:\n$$-1 \le \cos(1/x) \le 1$$\nMultiply the inequality by $x^2$ (which is non-negative):\n$$-x^2 \le x^2\cos(1/x) \le x^2$$\nAs $x \to 0$, both $\lim_{x \to 0} -x^2 = 0$ and $\lim_{x \to 0} x^2 = 0$.\nSince the function is "squeezed" between two functions that both approach 0, its limit must also be 0.'
     
-    WHEN 'Using the Squeeze Theorem, evaluate $\lim_{x \to 0} x^2 \cos\left(\frac{1}{x}\right)$.' THEN 
-        'Since $-1 \leq \cos(1/x) \leq 1$, we have $-x^2 \leq x^2\cos(1/x) \leq x^2$. As $x^2 \to 0$, by the Squeeze Theorem the limit is 0.'
-    
-    WHEN 'Evaluate $\lim_{x \to -\infty} \frac{\sqrt{9x^2+1}}{x-2}$.' THEN 
-        'For $x\to-\infty$, $\sqrt{x^2} = |x| = -x$. Factor out $x$: $\frac{-x\sqrt{9+1/x^2}}{x(1-2/x)} \to \frac{-3}{1} = -3$.'
-    
-    WHEN 'What is $\lim_{x \to \infty} (\sqrt{x^2+x} - x)$?' THEN 
-        'Multiply by conjugate: $\frac{(\sqrt{x^2+x}-x)(\sqrt{x^2+x}+x)}{\sqrt{x^2+x}+x} = \frac{x}{\sqrt{x^2+x}+x} \to \frac{1}{2}$.'
-    
-    WHEN 'Find the vertical asymptotes of $f(x) = \frac{x^2-1}{x^2-x-6}$.' THEN 
-        'Factor denominator: $(x-3)(x+2)$. Vertical asymptotes occur at zeros of denominator not canceled by numerator: $x=3$ and $x=-2$.'
-    
-    WHEN 'Evaluate $\lim_{x \to 0} \frac{e^{2x} - 1}{\sin(x)}$.' THEN 
-        'This is a 0/0 form. Apply L''Hôpital''s rule: $\frac{2e^{2x}}{\cos(x)} \to \frac{2}{1} = 2$.'
-    
+    WHEN 'Evaluate $\lim_{x \to -\infty} \frac{\sqrt{9x^2+1}}{x-2}$.' THEN
+        'For limits at negative infinity, remember that $\sqrt{x^2} = |x| = -x$ for $x<0$.\nDivide the numerator and denominator by the highest power of $x$ in the denominator, which is $x$.\n$$\lim_{x \to -\infty} \frac{\sqrt{9x^2+1}/x}{(x-2)/x} = \lim_{x \to -\infty} \frac{-\sqrt{(9x^2+1)/x^2}}{1-2/x}$$\n$$= \lim_{x \to -\infty} \frac{-\sqrt{9+1/x^2}}{1-2/x} = \frac{-\sqrt{9+0}}{1-0} = -3$$'
+
+    WHEN 'What is $\lim_{x \to \infty} (\sqrt{x^2+x} - x)$?' THEN
+        'This is an $\infty - \infty$ indeterminate form. We can solve this by multiplying by the conjugate, which is $(\sqrt{x^2+x}+x)$.\n$$\lim_{x \to \infty} \frac{(\sqrt{x^2+x}-x)(\sqrt{x^2+x}+x)}{\sqrt{x^2+x}+x} = \lim_{x \to \infty} \frac{(x^2+x) - x^2}{\sqrt{x^2+x}+x}$$\n$$= \lim_{x \to \infty} \frac{x}{\sqrt{x^2+x}+x}$$\nNow, divide the numerator and denominator by $x$:\n$$\lim_{x \to \infty} \frac{1}{\sqrt{1+1/x}+1} = \frac{1}{\sqrt{1+0}+1} = \frac{1}{2}$$'
+
+    WHEN 'Find the vertical asymptotes of $f(x) = \frac{x^2-1}{x^2-x-6}$.' THEN
+        'Vertical asymptotes occur where the denominator is zero, provided the numerator is not also zero at that point.\nFactor the denominator: $$x^2-x-6 = (x-3)(x+2)$$\nThe denominator is zero at $x=3$ and $x=-2$.\nNeither of these values makes the numerator zero, so both are vertical asymptotes.'
+
+    WHEN 'Evaluate $\lim_{x \to 0} \frac{e^{2x} - 1}{\sin(x)}$.' THEN
+        'Substituting $x=0$ gives a 0/0 indeterminate form, so we can apply L''Hopital''s Rule.\nTake the derivative of the numerator and the denominator:\n$$\lim_{x \to 0} \frac{d/dx(e^{2x} - 1)}{d/dx(\sin(x))} = \lim_{x \to 0} \frac{2e^{2x}}{\cos(x)}$$\nNow, substitute $x=0$:\n$$\frac{2e^{0}}{\cos(0)} = \frac{2(1)}{1} = 2$$'
+
     WHEN 'Which of the following is the formal definition of the derivative?' THEN 
-        'The derivative is defined as $\lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$, which is option D. The other options represent different concepts (difference quotient, limit definition, integral).'
+        'The formal definition of the derivative of a function $f(x)$ at a point $x$ is given by the limit of the difference quotient as the interval $h$ approaches zero.\nThis is expressed as:\n$$f''(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$$\nThis represents the instantaneous rate of change of the function.'
+
+
+
+    WHEN 'Find the derivative of $y = \tan^{-1}(2x)$.' THEN
+        'This requires the chain rule combined with the derivative of arctan.\nThe standard derivative is $\frac{d}{du}(\tan^{-1}u) = \frac{1}{1+u^2}$.\nIn this case, the inner function is $u=2x$, so $\frac{du}{dx}=2$.\nApplying the chain rule, $\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}$:\n$$\frac{dy}{dx} = \frac{1}{1+(2x)^2} \cdot 2 = \frac{2}{1+4x^2}$$'
+
+    WHEN 'The second derivative of a function $f(x)$ represents:' THEN
+        'The second derivative, $f''''(x)$, describes the **concavity** of the function''s graph.\n- If $f''''(x) > 0$, the graph is concave **upward** (like a cup).\n- If $f''''(x) < 0$, the graph is concave **downward** (like a frown).\nIt also tells us how the first derivative (the slope) is changing.'
+
+    WHEN 'Find the derivative of $f(x) = e^{\sin(x)}$.' THEN
+        'This requires the chain rule. The outer function is $e^u$ and the inner function is $u=\sin(x)$.\nThe derivative of $e^u$ is $e^u$, and the derivative of $\sin(x)$ is $\cos(x)$.\nApplying the chain rule, $f''(x) = e^u \cdot \frac{du}{dx}$:\n$$f''(x) = e^{\sin(x)} \cdot \cos(x)$$'
+
+    WHEN 'If $f(x) = (x^2+1)^3$, find $f''(1)$.' THEN
+        'First, find the derivative, $f''(x)$, using the chain rule.\n$$f''(x) = 3(x^2+1)^2 \cdot \frac{d}{dx}(x^2+1)$$\n$$f''(x) = 3(x^2+1)^2 \cdot (2x) = 6x(x^2+1)^2$$\nNow, substitute $x=1$ into the derivative:\n$$f''(1) = 6(1)(1^2+1)^2 = 6(2)^2 = 6(4) = 24$$'
+
+    WHEN 'What is the derivative of $y = \cos(x^2)$?' THEN
+        'This is an application of the chain rule.\nThe outer function is $\cos(u)$ and the inner function is $u=x^2$.\nThe derivative of $\cos(u)$ is $-\sin(u)$, and the derivative of $x^2$ is $2x$.\nApplying the chain rule:\n$$\frac{dy}{dx} = -\sin(x^2) \cdot 2x = -2x\sin(x^2)$$'
+
+    WHEN 'The slope of the tangent line to the graph of $f(x) = x^3$ at $x=2$ is:' THEN
+        'The slope of the tangent line at any point is given by the value of the first derivative at that point.\nFirst, find the derivative of $f(x)=x^3$:\n$$f''(x) = 3x^2$$\nNow, evaluate the derivative at $x=2$:\n$$f''(2) = 3(2)^2 = 3(4) = 12$$'
+
+    WHEN 'Find the derivative of $f(x) = \frac{x}{x+1}$.' THEN
+        'Use the quotient rule: $\left(\frac{u}{v}\right)'' = \frac{u''v - uv''}{v^2}$.\nLet $u=x$ and $v=x+1$. Then $u''=1$ and $v''=1$.\n$$f''(x) = \frac{(1)(x+1) - (x)(1)}{(x+1)^2}$$\n$$f''(x) = \frac{x+1-x}{(x+1)^2} = \frac{1}{(x+1)^2}$$'
+
+    WHEN 'If $y=5^x$, what is $\frac{dy}{dx}$?' THEN
+        'This is the derivative of an exponential function with a base other than $e$.\nThe rule is $\frac{d}{dx}(a^x) = a^x \ln(a)$.\nIn this case, $a=5$, so the derivative is:\n$$\frac{dy}{dx} = 5^x \ln(5)$$'
+
+    WHEN 'What is the derivative of $y=x^2+3x-5$?' THEN
+        'We can differentiate term by term using the power rule.\n- The derivative of $x^2$ is $2x$.\n- The derivative of $3x$ is $3$.\n- The derivative of the constant $-5$ is $0$.\nCombining these gives: $$\frac{dy}{dx} = 2x + 3$$'
+
+    WHEN 'If $s(t) = 4.9t^2$ is the distance function, find the velocity at $t=2$.' THEN
+        'Velocity is the first derivative of the position (or distance) function with respect to time.\n$$v(t) = s''(t) = \frac{d}{dt}(4.9t^2) = 2 \cdot 4.9t = 9.8t$$\nNow, evaluate the velocity at $t=2$:\n$$v(2) = 9.8(2) = 19.6$$'
+
+    WHEN 'Find the derivative of $f(x) = \sin(x)\cos(x)$.' THEN
+        'Use the product rule: $(uv)'' = u''v + uv''$.\nLet $u=\sin(x)$ and $v=\cos(x)$. Then $u''=\cos(x)$ and $v''=-\sin(x)$.\n$$f''(x) = (\cos x)(\cos x) + (\sin x)(-\sin x)$$\n$$f''(x) = \cos^2(x) - \sin^2(x)$$\nThis can also be simplified using the double angle identity to $\cos(2x)$.'
+
+    WHEN 'Find the critical points of $f(x) = x^3 - 3x$.' THEN
+        'Critical points occur where the first derivative is zero or undefined.\nFirst, find the derivative:\n$$f''(x) = 3x^2 - 3$$\nSet the derivative to zero and solve for $x$:\n$$3x^2 - 3 = 0 \implies 3(x^2-1) = 0$$\n$$x^2-1 = 0 \implies (x-1)(x+1)=0$$\nThe critical points are $x=1$ and $x=-1$.'
+
+    WHEN 'What is the derivative of $y = \sec(x)$?' THEN
+        'This is a standard derivative of a trigonometric function.\nOne way to derive it is by writing $\sec(x) = \frac{1}{\cos(x)}$ and using the quotient rule.\nThe result is a known formula:\n$$\frac{d}{dx}(\sec x) = \sec x \tan x$$'
+
+    WHEN 'If a function is differentiable at a point, it must also be:' THEN
+        '**Differentiability implies continuity.**\nFor a function to have a derivative at a point, it must be continuous at that point. If there is a break, jump, or hole in the graph (discontinuity), you cannot define a unique tangent line, and therefore the derivative does not exist.'
+
+    WHEN 'What is the derivative of $f(x)= \sqrt{x}$?' THEN
+        'First, rewrite the square root using a fractional exponent:\n$$f(x) = x^{1/2}$$\nNow, apply the power rule, $\frac{d}{dx}(x^n) = nx^{n-1}$, with $n=1/2$.\n$$f''(x) = \frac{1}{2}x^{1/2 - 1} = \frac{1}{2}x^{-1/2}$$\nThis can be rewritten as: $$\frac{1}{2\sqrt{x}}$$'
+
     
-    WHEN 'If a function is continuous at a point, must it be differentiable at that point?' THEN 
-        'No, continuity does not guarantee differentiability. Example: $f(x)=|x|$ is continuous at 0 but not differentiable there.'
+    WHEN 'The second derivative of a function $f(x)$ represents:' THEN
+        'The second derivative, $f''''(x)$, describes the **concavity** of the function''s graph.\n- If $f''''(x) > 0$, the graph is concave **upward** (like a cup).\n- If $f''''(x) < 0$, the graph is concave **downward** (like a frown).\nIt also tells us how the first derivative (the slope) is changing.'
+
+    WHEN 'Find the derivative of $f(x) = e^{\sin(x)}$.' THEN
+        'This requires the chain rule. The outer function is $e^u$ and the inner function is $u=\sin(x)$.\nThe derivative of $e^u$ is $e^u$, and the derivative of $\sin(x)$ is $\cos(x)$.\nApplying the chain rule, $f''(x) = e^u \cdot \frac{du}{dx}$:\n$$f''(x) = e^{\sin(x)} \cdot \cos(x)$$'
+
+    WHEN 'If $f(x) = (x^2+1)^3$, find $f''(1)$.' THEN
+        'First, find the derivative, $f''(x)$, using the chain rule.\n$$f''(x) = 3(x^2+1)^2 \cdot \frac{d}{dx}(x^2+1)$$\n$$f''(x) = 3(x^2+1)^2 \cdot (2x) = 6x(x^2+1)^2$$\nNow, substitute $x=1$ into the derivative:\n$$f''(1) = 6(1)(1^2+1)^2 = 6(2)^2 = 6(4) = 24$$'
+
+    WHEN 'What is the derivative of $y = \cos(x^2)$?' THEN
+        'This is an application of the chain rule.\nThe outer function is $\cos(u)$ and the inner function is $u=x^2$.\nThe derivative of $\cos(u)$ is $-\sin(u)$, and the derivative of $x^2$ is $2x$.\nApplying the chain rule:\n$$\frac{dy}{dx} = -\sin(x^2) \cdot 2x = -2x\sin(x^2)$$'
+
+    WHEN 'The slope of the tangent line to the graph of $f(x) = x^3$ at $x=2$ is:' THEN
+        'The slope of the tangent line at any point is given by the value of the first derivative at that point.\nFirst, find the derivative of $f(x)=x^3$:\n$$f''(x) = 3x^2$$\nNow, evaluate the derivative at $x=2$:\n$$f''(2) = 3(2)^2 = 3(4) = 12$$'
+
+    WHEN 'Find the derivative of $f(x) = \frac{x}{x+1}$.' THEN
+        'Use the quotient rule: $\left(\frac{u}{v}\right)'' = \frac{u''v - uv''}{v^2}$.\nLet $u=x$ and $v=x+1$. Then $u''=1$ and $v''=1$.\n$$f''(x) = \frac{(1)(x+1) - (x)(1)}{(x+1)^2}$$\n$$f''(x) = \frac{x+1-x}{(x+1)^2} = \frac{1}{(x+1)^2}$$'
+
+    WHEN 'If $y=5^x$, what is $\frac{dy}{dx}$?' THEN
+        'This is the derivative of an exponential function with a base other than $e$.\nThe rule is $\frac{d}{dx}(a^x) = a^x \ln(a)$.\nIn this case, $a=5$, so the derivative is:\n$$\frac{dy}{dx} = 5^x \ln(5)$$'
+
+    WHEN 'What is the derivative of $y=x^2+3x-5$?' THEN
+        'We can differentiate term by term using the power rule.\n- The derivative of $x^2$ is $2x$.\n- The derivative of $3x$ is $3$.\n- The derivative of the constant $-5$ is $0$.\nCombining these gives: $$\frac{dy}{dx} = 2x + 3$$'
+
+    WHEN 'If $s(t) = 4.9t^2$ is the distance function, find the velocity at $t=2$.' THEN
+        'Velocity is the first derivative of the position (or distance) function with respect to time.\n$$v(t) = s''(t) = \frac{d}{dt}(4.9t^2) = 2 \cdot 4.9t = 9.8t$$\nNow, evaluate the velocity at $t=2$:\n$$v(2) = 9.8(2) = 19.6$$'
+
+    WHEN 'Find the derivative of $f(x) = \sin(x)\cos(x)$.' THEN
+        'Use the product rule: $(uv)'' = u''v + uv''$.\nLet $u=\sin(x)$ and $v=\cos(x)$. Then $u''=\cos(x)$ and $v''=-\sin(x)$.\n$$f''(x) = (\cos x)(\cos x) + (\sin x)(-\sin x)$$\n$$f''(x) = \cos^2(x) - \sin^2(x)$$\nThis can also be simplified using the double angle identity to $\cos(2x)$.'
+
+    WHEN 'Find the critical points of $f(x) = x^3 - 3x$.' THEN
+        'Critical points occur where the first derivative is zero or undefined.\nFirst, find the derivative:\n$$f''(x) = 3x^2 - 3$$\nSet the derivative to zero and solve for $x$:\n$$3x^2 - 3 = 0 \implies 3(x^2-1) = 0$$\n$$x^2-1 = 0 \implies (x-1)(x+1)=0$$\nThe critical points are $x=1$ and $x=-1$.'
+
+    WHEN 'What is the derivative of $y = \sec(x)$?' THEN
+        'This is a standard derivative of a trigonometric function.\nOne way to derive it is by writing $\sec(x) = \frac{1}{\cos(x)}$ and using the quotient rule.\nThe result is a known formula:\n$$\frac{d}{dx}(\sec x) = \sec x \tan x$$'
+
+    WHEN 'If a function is differentiable at a point, it must also be:' THEN
+        '**Differentiability implies continuity.**\nFor a function to have a derivative at a point, it must be continuous at that point. If there is a break, jump, or hole in the graph (discontinuity), you cannot define a unique tangent line, and therefore the derivative does not exist.'
+
+    WHEN 'What is the derivative of $f(x)= \sqrt{x}$?' THEN
+        'First, rewrite the square root using a fractional exponent:\n$$f(x) = x^{1/2}$$\nNow, apply the power rule, $\frac{d}{dx}(x^n) = nx^{n-1}$, with $n=1/2$.\n$$f''(x) = \frac{1}{2}x^{1/2 - 1} = \frac{1}{2}x^{-1/2}$$\nThis can be rewritten as: $$\frac{1}{2\sqrt{x}}$$'
+
+    WHEN 'Find the derivative of $y= \ln(x^2+1)$.' THEN
+        'This requires the chain rule. The outer function is $\ln(u)$ and the inner function is $u=x^2+1$.\nThe derivative of $\ln(u)$ is $\frac{1}{u}$, and the derivative of $x^2+1$ is $2x$.\nApplying the chain rule:\n$$\frac{dy}{dx} = \frac{1}{x^2+1} \cdot 2x = \frac{2x}{x^2+1}$$'
+
+    WHEN 'Find the absolute maximum value of f(x) = x³ - 3x on the interval [0, 2].' THEN
+        'To find the absolute maximum on a closed interval, we must check the function''s value at the critical points within the interval and at the endpoints.\n1.  **Find critical points**: First, find the derivative, f''(x) = 3x² - 3. Set it to zero: 3x² - 3 = 0, which gives x = ±1. The only critical point in our interval [0, 2] is x=1.\n2.  **Evaluate at points**: Now, test the function at the endpoints (0 and 2) and the critical point (1).\n    * f(0) = 0³ - 3(0) = 0\n    * f(1) = 1³ - 3(1) = -2\n    * f(2) = 2³ - 3(2) = 8 - 6 = 2\n3.  **Compare values**: The values are 0, -2, and 2. The highest value is 2.'
+
+    WHEN 'The inflection point of a function is where:' THEN
+        'An inflection point is a point on a curve where the **concavity changes**. This means the graph switches from being concave upward (like a cup) to concave downward (like a frown), or vice versa. This change occurs where the second derivative, f''''(x), is either zero or undefined.'
+
+    WHEN 'If a function''s first derivative is negative on an interval, the function is:' THEN
+        'The first derivative, f''(x), tells us the slope of the function.\n* If f''(x) > 0 (positive), the function is **increasing** (going uphill).\n* If f''(x) < 0 (negative), the function is **decreasing** (going downhill). 📉'
+
+    WHEN 'Find the derivative of y = x^sin(x).' THEN
+        'This requires a technique called **logarithmic differentiation** because the variable appears in both the base and the exponent.\n1.  **Take the natural log**: ln(y) = ln(x^sin(x)). Using log properties, this becomes ln(y) = sin(x) * ln(x).\n2.  **Differentiate implicitly**: Differentiate both sides with respect to x, using the product rule on the right.\n    (1/y) * (dy/dx) = [cos(x) * ln(x)] + [sin(x) * (1/x)]\n3.  **Solve for dy/dx**: Multiply both sides by y.\n    dy/dx = y * [cos(x)ln(x) + sin(x)/x]\n4.  **Substitute back y**: Replace y with the original function, x^sin(x).\n    dy/dx = x^sin(x) * [cos(x)ln(x) + sin(x)/x]'
+
+    WHEN 'What are the dimensions of the largest rectangle that can be inscribed in a semicircle of radius 4?' THEN
+        '1.  **Set up the problem**: Let the rectangle have corners at (x, y) and (-x, y) on the semicircle and (-x, 0), (x, 0) on the x-axis. The semicircle''s equation is x² + y² = 16. The rectangle''s area is A = (2x)(y).\n2.  **Express Area with one variable**: From the circle equation, y = sqrt(16 - x²). So, Area A(x) = 2x * sqrt(16 - x²).\n3.  **Maximize Area**: To make differentiation easier, we can maximize A² instead of A. A² = 4x²(16 - x²) = 64x² - 4x⁴. Find the derivative with respect to x and set to 0.\n    d(A²)/dx = 128x - 16x³ = 0\n    16x(8 - x²) = 0\n    This gives x² = 8, so x = sqrt(8) = 2√2.\n4.  **Find Dimensions**: The width is 2x = 4√2. The height is y = sqrt(16 - 8) = sqrt(8) = 2√2.'
+
+    WHEN 'A particle''s position is given by s(t) = t³-6t²+9t. When is the particle at rest?' THEN
+        'The particle is at rest when its velocity is zero. Velocity is the first derivative of the position function, s(t).\n1.  **Find the velocity function**: v(t) = s''(t) = 3t² - 12t + 9.\n2.  **Set velocity to zero**: 3t² - 12t + 9 = 0.\n3.  **Solve for t**: Divide by 3 to simplify: t² - 4t + 3 = 0. Factor the quadratic: (t-1)(t-3) = 0. The solutions are t=1 and t=3.'
+
+    WHEN 'According to the Mean Value Theorem, for f(x) = x² on [0, 2], there must be a point c such that:' THEN
+        'The Mean Value Theorem (MVT) states there is a point c in (a, b) where the instantaneous slope, f''(c), equals the average slope over [a, b].\n1.  **Find the average slope**: (f(b) - f(a)) / (b - a) = (f(2) - f(0)) / (2 - 0) = (4 - 0) / 2 = 2.\n2.  **Find the instantaneous slope**: f''(x) = 2x. So, f''(c) = 2c.\n3.  **Set them equal**: According to the MVT, f''(c) = 2. So, 2c = 2, which means c = 1.'
+
+    WHEN 'The linear approximation of f(x) = ln(x) at x=1 is:' THEN
+        'The formula for linear approximation (or the tangent line) at x=a is L(x) = f(a) + f''(a)(x-a).\n1.  **Find the point**: Here, a=1. f(1) = ln(1) = 0. The point is (1, 0).\n2.  **Find the slope**: The derivative is f''(x) = 1/x. The slope at a=1 is f''(1) = 1/1 = 1.\n3.  **Write the equation**: L(x) = 0 + 1*(x-1), which simplifies to L(x) = x-1.'
+
+    WHEN 'What is the absolute minimum value of f(x)=x²-2x+3 on [-1,3]?' THEN
+        'To find the absolute minimum on a closed interval, we check the function''s value at the critical points within the interval and at the endpoints.\n1.  **Find critical points**: f''(x) = 2x - 2. Setting it to zero gives 2x - 2 = 0, so x = 1. This point is in our interval [-1, 3].\n2.  **Evaluate at points**: Test the function at the endpoints (-1 and 3) and the critical point (1).\n    * f(-1) = (-1)² - 2(-1) + 3 = 1 + 2 + 3 = 6\n    * f(1) = 1² - 2(1) + 3 = 1 - 2 + 3 = 2\n    * f(3) = 3² - 2(3) + 3 = 9 - 6 + 3 = 6\n3.  **Compare values**: The values are 6, 2, and 6. The lowest value is 2.'
+
+    WHEN 'If f''(x) > 0 on an interval, the function is:' THEN
+        'The second derivative, f''''(x), tells us about the concavity of a function.\n* If f''''(x) > 0, the function is **concave up**. This means the slope of the function is increasing, and its graph looks like a cup. ∪\n* If f''''(x) < 0, the function is **concave down**.'
+
+    -- Category: Integration
+    WHEN 'What is ∫(2x+1)dx?' THEN
+        'We integrate term by term using the power rule for integration, which is ∫xⁿdx = (xⁿ⁺¹)/(n+1).\n* For the 2x term, n=1: ∫2x dx = 2 * (x¹⁺¹)/(1+1) = 2 * (x²/2) = x².\n* For the 1 term, n=0: ∫1 dx = x.\nDon''t forget to add the constant of integration, C.\nCombining these gives: x² + x + C.'
+
+    WHEN 'Evaluate the definite integral ∫ from 0 to 1 of x²dx.' THEN
+        'First, find the antiderivative of x² using the power rule for integration.\n∫x²dx = x³/3.\nNow, use the Fundamental Theorem of Calculus to evaluate from 0 to 1:\n[x³/3] from 0 to 1 = (1³/3) - (0³/3) = 1/3 - 0 = 1/3.'
+
+    WHEN 'The area under the curve y=f(x) from x=a to x=b is given by:' THEN
+        'A fundamental concept in calculus is that the definite integral of a non-negative function represents the area between the function''s graph and the x-axis.\nTherefore, the area under the curve y=f(x) from x=a to x=b is given by the definite integral: ∫ from a to b of f(x)dx.'
+
+    WHEN 'What is the integral of sin(x)?' THEN
+        'This is a standard integration formula based on reversing differentiation. The derivative of -cos(x) is -(-sin(x)) = sin(x).\nTherefore, the integral of sin(x) is:\n∫sin(x)dx = -cos(x) + C.\nAlways remember the constant of integration, C.'
+
+    WHEN 'Evaluate ∫ from 0 to π/2 of cos(x)dx.' THEN
+        'First, find the antiderivative of cos(x). The antiderivative is sin(x).\nNow, use the Fundamental Theorem of Calculus to evaluate from 0 to π/2:\n[sin(x)] from 0 to π/2 = sin(π/2) - sin(0) = 1 - 0 = 1.'
+
+
+    -- From older questions file, ensuring they are calculus-related (continued)
+    WHEN 'If y = x², then dy/dx = ?' THEN
+        'This is a direct application of the power rule for differentiation, which states that for $f(x) = x^n$, the derivative is $f''(x) = nx^{n-1}$.\nIn this case, $n=2$, so the derivative is:\n$$ \frac{dy}{dx} = 2x^{2-1} = 2x $$'
+
+    WHEN 'The mean value theorem applies to functions that are:' THEN
+        'The Mean Value Theorem has two main requirements for a function $f(x)$ on a closed interval $[a,b]$:\n1. The function must be **continuous** on the closed interval $[a,b]$.\n2. The function must be **differentiable** on the open interval $(a,b)$.\nTherefore, the function must be both continuous and differentiable.'
+
+    WHEN '∫1/x dx = ?' THEN
+        'This is a standard integration formula. The integral of $1/x$ is the natural logarithm of the absolute value of $x$.\n$$ \int \frac{1}{x} dx = \ln|x| + C $$\nThe absolute value is necessary because the domain of $\ln(x)$ is only positive numbers, while the domain of $1/x$ includes all non-zero numbers.'
+
+    WHEN 'What is lim(x→∞) 1/x ?' THEN
+        'This limit asks what value the function $f(x) = 1/x$ approaches as $x$ becomes infinitely large.\nAs the denominator $x$ gets larger and larger, the value of the fraction $1/x$ gets smaller and smaller, approaching 0.\nTherefore, the limit is 0.'
+
+    WHEN 'The critical points of a function occur where:' THEN
+        'Critical points of a function $f(x)$ are the points in the domain where the first derivative, $f''(x)$, is either equal to zero or is undefined.\nThese points are important because they are potential locations for local maxima or minima.'
+
+    WHEN 'The fundamental theorem of calculus part 1 states:' THEN
+        'The Fundamental Theorem of Calculus, Part 1, establishes a connection between differentiation and integration.\nIt states that if a function $f$ is continuous, then the function defined as $g(x) = \int_a^x f(t)dt$ has a derivative, and that derivative is the original function $f(x)$.\nSymbolically: $$\frac{d}{dx} \int_a^x f(t)dt = f(x)$$'
+
+    WHEN 'If f(x) = x³ - 3x² + 2x - 1, then f''(1) = ?' THEN
+        'First, find the first derivative of the function:\n$$ f''(x) = 3x^2 - 6x + 2 $$\nNow, substitute $x=1$ into the first derivative:\n$$ f''(1) = 3(1)^2 - 6(1) + 2 = 3 - 6 + 2 = -1 $$'
     
-    WHEN 'What is $\lim_{x \to 0} \frac{\sin(5x)}{\sin(2x)}$?' THEN 
-        'Rewrite as $\frac{5}{2} \cdot \frac{\sin(5x)/5x}{\sin(2x)/2x} \to \frac{5}{2} \cdot \frac{1}{1} = 5/2$.'
+    WHEN 'L''Hopital''s rule can be applied when we have:' THEN
+        'L''Hopital''s Rule is a method for evaluating limits of fractions that result in an indeterminate form.\nThe rule can be applied specifically when the limit evaluates to $\frac{0}{0}$ or $\frac{\infty}{\infty}$.'
+
+    WHEN 'The derivative of x^n is:' THEN
+        'This is the Power Rule, one of the most fundamental rules of differentiation.\nIt states that for any real number $n$, the derivative of $x^n$ is:\n$$ \frac{d}{dx}[x^n] = nx^{n-1} $$'
+
+    WHEN 'A function has a local maximum at x = c if:' THEN
+        'The Second Derivative Test helps determine if a critical point is a local maximum or minimum.\nIf $f''(c) = 0$ (meaning $x=c$ is a critical point) and the second derivative $f''''(c) < 0$ (meaning the function is concave down), then the function has a local maximum at $x=c$.'
+
+    WHEN 'The implicit differentiation of x² + y² = 25 gives dy/dx = ?' THEN
+        'We differentiate both sides of the equation with respect to $x$, remembering to use the chain rule for terms involving $y$.\n$$ \frac{d}{dx}(x^2) + \frac{d}{dx}(y^2) = \frac{d}{dx}(25) $$\n$$ 2x + 2y \frac{dy}{dx} = 0 $$\nNow, solve for $\frac{dy}{dx}$:\n$$ 2y \frac{dy}{dx} = -2x $$\n$$ \frac{dy}{dx} = -\frac{x}{y} $$'
+
+    WHEN 'The velocity is the derivative of:' THEN
+        'In calculus, velocity is defined as the rate of change of position with respect to time.\nTherefore, the velocity function $v(t)$ is the first derivative of the position function $s(t)$.\n$$ v(t) = s''(t) $$'
+
+    WHEN 'd/dx[x^x] = ?' THEN
+        'This requires logarithmic differentiation. Let $y = x^x$.\nTake the natural log of both sides: $$\ln y = \ln(x^x) = x \ln x$$\nDifferentiate implicitly: $$\frac{1}{y}\frac{dy}{dx} = (1)\ln x + x\left(\frac{1}{x}\right) = \ln x + 1$$\nSolve for $\frac{dy}{dx}$: $$\frac{dy}{dx} = y(\ln x + 1) = x^x(\ln x + 1)$$'
+
+    WHEN 'The definite integral ∫₀¹ x dx = ?' THEN
+        'Use the power rule for integration: $\int x dx = \frac{x^2}{2}$.\nNow evaluate the definite integral using the Fundamental Theorem of Calculus:\n$$ \left[\frac{x^2}{2}\right]_0^1 = \frac{1^2}{2} - \frac{0^2}{2} = \frac{1}{2} - 0 = \frac{1}{2} $$'
+
+    WHEN 'Rolle''s theorem requires the function to be:' THEN
+        'Rolle''s Theorem has three conditions for a function $f(x)$ on an interval $[a,b]$:\n1. $f(x)$ must be continuous on the closed interval $[a,b]$.\n2. $f(x)$ must be differentiable on the open interval $(a,b)$.\n3. The values of the function at the endpoints must be equal, i.e., $f(a)=f(b)$.'
+
+
+    -- From Group B(1).pdf
+    WHEN 'Given that a is a positive constant, evaluate \[ \int_{a}^{2a} \left( \frac{2x+1}{x} \right) dx \]' THEN
+        'First, simplify the integrand by splitting the fraction:\n$$\frac{2x+1}{x} = \frac{2x}{x} + \frac{1}{x} = 2 + \frac{1}{x}$$\nNow, integrate the simplified expression:\n$$\int_a^{2a} \left(2 + \frac{1}{x}\right) dx = [2x + \ln|x|]_a^{2a}$$\nEvaluate at the upper and lower bounds:\n$$= (2(2a) + \ln|2a|) - (2a + \ln|a|)$$\n$$= 4a + \ln(2a) - 2a - \ln(a)$$\nCombine terms and use the logarithm property $\ln(b) - \ln(a) = \ln(b/a)$:\n$$= 2a + \ln\left(\frac{2a}{a}\right) = 2a + \ln(2)$$
+        Since one of the options is \(a + \ln 4\), let''s double-check the provided answer key. My calculation yields \(2a + \ln 2\). The provided option A, \(3a + \ln 4\), seems incorrect based on the question. Let''s assume the intended answer was C, \(a+\ln 4\), which is also not correct. Given the options, there might be a typo in the question or options. The mathematically correct answer is \(2a + \ln 2\).'
+
+    WHEN 'Integrate \[ \int \sec^2 x \tan x dx \]' THEN
+        'This integral can be solved using u-substitution.\nLet $u = \tan x$. Then the differential is $du = \sec^2 x dx$.\nSubstitute $u$ and $du$ into the integral:\n$$\int u du = \frac{1}{2}u^2 + C$$\nNow, substitute back for $u$:\n$$\frac{1}{2}\tan^2 x + C$$\nNote: An equivalent answer is $\frac{1}{2}\sec^2 x + C$ because $\tan^2 x = \sec^2 x - 1$, and the constant term can be absorbed into the constant of integration $C$.'
+
+    WHEN 'The nth term of the Maclaurin series expansion of cos 3x is' THEN
+        'The general Maclaurin series for $\cos(z)$ is:\n$$\cos z = \sum_{n=0}^\infty \frac{(-1)^n z^{2n}}{(2n)!} = 1 - \frac{z^2}{2!} + \frac{z^4}{4!} - \dots$$\nTo find the series for $\cos(3x)$, we substitute $z=3x$ into the general formula:\n$$\cos(3x) = \sum_{n=0}^\infty \frac{(-1)^n (3x)^{2n}}{(2n)!}$$\nThe nth term of this series is the general expression inside the summation:\n$$\frac{(-1)^n (3x)^{2n}}{(2n)!}$$'
+
+    WHEN 'The Wallis formula for \(\int_{0}^{2\pi} \sin^n x \, dx, n \geq 2\) and \(n\) is an odd number, is' THEN
+        'The standard Wallis formula applies to the interval $[0, \pi/2]$. For an odd exponent $n$, the integral over a full period $[0, 2\pi]$ is 0 due to symmetry.\nHowever, the question seems to refer to the pattern for the $[0, \pi/2]$ interval. For an odd $n \geq 3$, the formula is:\n$$\int_0^{\pi/2} \sin^n x dx = \frac{(n-1)(n-3)\dots(2)}{n(n-2)\dots(3)}$$\nThe options provided seem to be mismatched with the standard Wallis formula and the interval. Option C appears to be a misrepresentation of the formulas for even and odd powers combined.'
+
+    -- From Group B-4.pdf
+    WHEN 'Which of the following option best describes the reduction formula for \( V_n = \int cosec^n x dx, n \geq 2 \)' THEN
+        'This is a standard reduction formula derived using integration by parts.\nTo derive it, you would set $u = \csc^{n-2}x$ and $dv = \csc^2 x dx$.\nThe result of this process is:\n$$V_n = \int \csc^n x dx = -\frac{\csc^{n-2}x \cot x}{n-1} + \frac{n-2}{n-1}\int \csc^{n-2}x dx$$\nIn terms of $V_n$, this is:\n$$V_n = -\frac{1}{n-1}\csc^{n-2}x \cot x + \frac{n-2}{n-1} V_{n-2}$$'
     
-    WHEN 'Find the horizontal asymptote of $f(x) = \frac{1-3x^2}{x^2+4x}$.' THEN 
-        'For large $x$, the highest degree terms dominate: $\frac{-3x^2}{x^2} = -3$. Thus $y=-3$ is the horizontal asymptote.'
-    
-    WHEN 'Evaluate $\lim_{x \to 25} \frac{x-25}{\sqrt{x}-5}$.' THEN 
-        'Multiply numerator and denominator by $\sqrt{x}+5$: $\frac{(x-25)(\sqrt{x}+5)}{x-25} = \sqrt{x}+5 \to 10$.'
-    
-    WHEN 'What is $\lim_{x \to 0} (1+3x)^{1/x}$?' THEN 
-        'This is a $1^\infty$ form. Let $y=(1+3x)^{1/x}$, then $\ln y = \frac{\ln(1+3x)}{x} \to \frac{3}{1+3x} \to 3$. Thus $y \to e^3$.'
-    
-    WHEN 'The Intermediate Value Theorem guarantees that if a function is continuous on $[a,b]$, then...' THEN 
-        'The IVT states that for any $k$ between $f(a)$ and $f(b)$, there exists $c\in(a,b)$ with $f(c)=k$. Thus it takes on every intermediate value.'
-    
-    WHEN 'Evaluate $\lim_{x \to 0} \frac{1-\cos(x)}{x^2}$' THEN 
-        'Multiply numerator and denominator by $1+\cos(x)$: $\frac{1-\cos^2x}{x^2(1+\cos x)} = \frac{\sin^2x}{x^2(1+\cos x)} \to \frac{1}{2}$.'
-    
-    WHEN 'Find $\lim_{x \to \infty} \arctan(x)$.' THEN 
-        'As $x\to\infty$, $\arctan(x)$ approaches $\pi/2$ (the horizontal asymptote of the arctangent function).'
-    
-    WHEN 'If $\lim_{x \to a} f(x)$ exists, which must be true?' THEN 
-        'For the limit to exist, the left-hand and right-hand limits must be equal: $\lim_{x\to a^-} f(x) = \lim_{x\to a^+} f(x)$. The function need not be defined or continuous at $a$.'
-    
-    WHEN 'Find the slant asymptote of $f(x) = \frac{x^2+1}{x-1}$.' THEN 
-        'Perform polynomial long division: $\frac{x^2+1}{x-1} = x+1 + \frac{2}{x-1}$. As $x\to\pm\infty$, the remainder term vanishes, leaving $y=x+1$ as the slant asymptote.'
-    
-    WHEN 'Evaluate $\lim_{x \to 1} \frac{x^{10}-1}{x-1}$' THEN 
-        'This is the definition of the derivative of $x^{10}$ at $x=1$, which is $10x^9|_{x=1}=10$. Alternatively, recognize it as a geometric series limit.'
-    
-    -- Category: Differentiation (35 Questions)
-    WHEN 'Find the derivative of $f(x) = x^{\ln x}$.' THEN 
-        'Use logarithmic differentiation: $\ln f = \ln x \cdot \ln x = (\ln x)^2$. Differentiate: $\frac{f''}{f} = 2\ln x \cdot \frac{1}{x} \Rightarrow f'' = x^{\ln x} \cdot \frac{2\ln x}{x}$.'
-    
-    WHEN 'If $f(x) = \int_{1}^{\sqrt{x}} e^{t^2} dt$, what is $f''(x)$?' THEN 
-        'By FTC Part 1 and chain rule: $f''(x) = e^{(\sqrt{x})^2} \cdot \frac{1}{2\sqrt{x}} = \frac{e^x}{2\sqrt{x}}$.'
-    
-    WHEN 'What is the derivative of $f(x) = \arctan(e^x)$?' THEN 
-        'Using the chain rule: $\frac{d}{dx}\arctan(u) = \frac{u''}{1+u^2}$. Here $u=e^x$, so $f''(x) = \frac{e^x}{1+e^{2x}}$.'
-    
-    WHEN 'Find $\frac{dy}{dx}$ if $x^3 + y^3 = 6xy$.' THEN 
-        'Implicit differentiation: $3x^2 + 3y^2 y'' = 6y + 6x y''$. Solve for $y''$: $y'' = \frac{6y-3x^2}{3y^2-6x} = \frac{2y-x^2}{y^2-2x}$.'
-    
-    WHEN 'The position of a particle is given by $s(t) = t^3 - 6t^2 + 9t$. When is the particle at rest?' THEN 
-        'The particle is at rest when velocity $v(t)=s''(t)=3t^2-12t+9=0$. Solving: $t^2-4t+3=0 \Rightarrow t=1$ and $t=3$.'
-        WHEN 'Find the critical points of $f(x) = x^{1/3}(x-4)$.' THEN 
-        'First find the derivative: $f''(x) = \frac{1}{3}x^{-2/3}(x-4) + x^{1/3} = \frac{x-4}{3x^{2/3}} + x^{1/3}$. Set equal to 0: $\frac{x-4 + 3x}{3x^{2/3}} = 0 \Rightarrow 4x-4=0 \Rightarrow x=1$. Also consider where $f''$ is undefined: $x=0$. Thus critical points at $x=0$ and $x=1$.'
-    
-    WHEN 'What is the second derivative of $f(x) = \ln(\cos(x))$?' THEN 
-        'First derivative: $f''(x) = \frac{-\sin(x)}{\cos(x)} = -\tan(x)$. Second derivative: $f''''(x) = -\sec^2(x)$.'
-    
-    WHEN 'Find the equation of the tangent line to the curve $y=x\sqrt{x}$ at the point $(4, 8)$.' THEN 
-        'Rewrite as $y=x^{3/2}$. Derivative: $y'' = \frac{3}{2}x^{1/2}$. At $x=4$, slope $m=\frac{3}{2}(2)=3$. Tangent line: $y-8=3(x-4) \Rightarrow y=3x-4$.'
-    
-    WHEN 'If $f(x) = \sin(x)$, what is the 27th derivative, $f^{(27)}(x)$?' THEN 
-        'The derivatives of sine cycle every 4: $\sin(x), \cos(x), -\sin(x), -\cos(x), \sin(x),...$. Since $27 \mod 4 = 3$, the 27th derivative is the same as the 3rd: $-\cos(x)$.'
-    
-    WHEN 'The radius of a circle is increasing at a rate of 2 cm/s. At what rate is the area increasing when the radius is 10 cm?' THEN 
-        'Area $A=\pi r^2$. Differentiate: $\frac{dA}{dt} = 2\pi r \frac{dr}{dt}$. At $r=10$: $\frac{dA}{dt} = 2\pi(10)(2) = 40\pi$ cm²/s.'
-    
-    WHEN 'Find the point of inflection for $f(x) = x^3 - 3x^2 + 2$.' THEN 
-        'First derivative: $f''(x)=3x^2-6x$. Second derivative: $f''''(x)=6x-6$. Set $f''''(x)=0 \Rightarrow x=1$. Check sign change: $f''''(0)=-6$, $f''''(2)=6$, so inflection point at $x=1$.'
-    
-    WHEN 'What is the derivative of $f(x) = \csc(x)$?' THEN 
-        'Recall $\csc(x) = 1/\sin(x)$. Using quotient rule: $f''(x) = -\frac{\cos(x)}{\sin^2(x)} = -\csc(x)\cot(x)$.'
-    
-    WHEN 'If $f(x)=2^{x^2}$, find $f''(x)$.' THEN 
-        'Using chain rule and $a^u$ derivative: $f''(x) = 2^{x^2}\ln(2)(2x)$. The second derivative would require product rule on this result.'
-    
-    WHEN 'The Mean Value Theorem states that if $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, then there is a $c$ in $(a,b)$ such that...' THEN 
-        'The MVT guarantees a point where the instantaneous rate of change (derivative) equals the average rate of change: $f''(c) = \frac{f(b)-f(a)}{b-a}$.'
-    
-    WHEN 'Find the derivative of $f(x) = \log_3(x^2+1)$.' THEN 
-        'Using change of base and chain rule: $f''(x) = \frac{1}{(x^2+1)\ln 3} \cdot 2x = \frac{2x}{(x^2+1)\ln 3}$.'
-    
-    WHEN 'If $y = \sin^{-1}(2x)$, what is $\frac{dy}{dx}$?' THEN 
-        'Derivative of arcsine: $\frac{d}{dx}\sin^{-1}(u) = \frac{u''}{\sqrt{1-u^2}}$. Here $u=2x$, so $\frac{dy}{dx} = \frac{2}{\sqrt{1-(2x)^2}} = \frac{2}{\sqrt{1-4x^2}}$.'
-    
-    WHEN 'A ladder 10 ft long rests against a vertical wall. If the bottom of the ladder slides away from the wall at a rate of 1 ft/s, how fast is the top of the ladder sliding down the wall when the bottom of the ladder is 6 ft from the wall?' THEN 
-        'Use Pythagorean theorem: $x^2+y^2=100$. Differentiate: $2x\frac{dx}{dt} + 2y\frac{dy}{dt} = 0$. When $x=6$, $y=8$. Plug in: $2(6)(1) + 2(8)\frac{dy}{dt} = 0 \Rightarrow \frac{dy}{dt} = -12/16 = -3/4$ ft/s.'
-    
-    WHEN 'Find the absolute maximum value of $f(x) = x - x^3$ on the interval $[-2, 2]$.' THEN 
-        'Find critical points: $f''(x)=1-3x^2=0 \Rightarrow x=\pm\sqrt{1/3}$. Evaluate: $f(\sqrt{1/3}) = \sqrt{1/3} - (1/3)^{3/2} \approx 0.385$. Compare with endpoints: $f(-2)=6$, $f(2)=-6$. Absolute max is $6$ (at $x=-2$). [Correction: The correct maximum value is actually $2/(3\sqrt{3})$ at $x=\sqrt{1/3}$]'
-    
-    WHEN 'What is the derivative of $f(x) = |x^2-4|$ at $x=1$?' THEN 
-        'Near $x=1$, $x^2-4<0$, so $f(x)=4-x^2$. Thus $f''(x)=-2x \Rightarrow f''(1)=-2$.'
-    
-    WHEN 'The linearization of $f(x) = \sqrt{x}$ at $a=4$ is...' THEN 
-        'Linearization formula: $L(x)=f(a)+f''(a)(x-a)$. Here $f(4)=2$, $f''(x)=\frac{1}{2\sqrt{x}} \Rightarrow f''(4)=1/4$. Thus $L(x)=2+\frac{1}{4}(x-4)$.'
-    
-    WHEN 'If $f(x)$ is a differentiable function and $f(2)=5, f''(2)=-1$, find the derivative of $\frac{f(x)}{x^2}$ at $x=2$.' THEN 
-        'Use quotient rule: $\frac{d}{dx}\left(\frac{f(x)}{x^2}\right) = \frac{f''(x)x^2 - f(x)(2x)}{x^4}$. At $x=2$: $\frac{(-1)(4) - 5(4)}{16} = \frac{-24}{16} = -3/2$.'
-    
-    WHEN 'Find the derivative of $f(x) = \sec(x^2)$.' THEN 
-        'Chain rule: $f''(x) = \sec(x^2)\tan(x^2) \cdot 2x = 2x\sec(x^2)\tan(x^2)$.'
-    
-    WHEN 'What is the slope of the normal line to $y=x^3$ at $x=2$?' THEN 
-        'Derivative: $y''=3x^2 \Rightarrow$ slope at $x=2$ is $12$. Normal line slope is negative reciprocal: $-1/12$.'
-    
-    WHEN 'Rolle''s Theorem is a special case of which theorem?' THEN 
-        'Rolle''s Theorem (where $f(a)=f(b)$) is a special case of the Mean Value Theorem where the average rate of change is zero.'
-    
-    WHEN 'A particle moves along a line so that its velocity at time $t$ is $v(t)=t^2-t-6$. Find the displacement of the particle during the time period $1 \le t \le 4$.' THEN 
-        'Displacement is $\int_1^4 v(t)dt = \left[\frac{1}{3}t^3 - \frac{1}{2}t^2 - 6t\right]_1^4 = \left(\frac{64}{3}-8-24\right) - \left(\frac{1}{3}-\frac{1}{2}-6\right) = -\frac{56}{3} - (-\frac{35}{6}) = -\frac{77}{6} = -12.833... \approx -9/2$'
-    
-    WHEN 'Find the derivative of $f(x) = (x+1)^x$.' THEN 
-        'Use logarithmic differentiation: $\ln f = x\ln(x+1)$. Differentiate: $\frac{f''}{f} = \ln(x+1) + \frac{x}{x+1} \Rightarrow f''(x) = (x+1)^x\left(\ln(x+1) + \frac{x}{x+1}\right)$.'
-    
-    WHEN 'What does L''Hopital''s Rule help to evaluate?' THEN 
-        'L''Hopital''s Rule evaluates indeterminate forms (0/0 or ∞/∞) by comparing derivatives: $\lim_{x\to a}\frac{f(x)}{g(x)} = \lim_{x\to a}\frac{f''(x)}{g''(x)}$ when the original limit is indeterminate.'
-    
-    WHEN 'The position of a particle is $p(t)=e^{-t}\sin(t)$. Find its acceleration at $t=\pi$.' THEN 
-        'Velocity: $v(t)=-e^{-t}\sin(t) + e^{-t}\cos(t) = e^{-t}(\cos t - \sin t)$. Acceleration: $a(t)=-e^{-t}(\cos t - \sin t) + e^{-t}(-\sin t - \cos t) = -2e^{-t}\cos t$. At $t=\pi$: $a(\pi) = -2e^{-\pi}(-1) = 2e^{-\pi}$.'
-    
-    WHEN 'Find the average rate of change of $f(x) = x^3$ on the interval $[1,3]$.' THEN 
-        'Average rate of change is $\frac{f(3)-f(1)}{3-1} = \frac{27-1}{2} = 13$.'
-    
-    WHEN 'Find the derivative of $f(x) = \cosh(x) = \frac{e^x+e^{-x}}{2}$' THEN 
-        'Differentiate term by term: $f''(x) = \frac{e^x - e^{-x}}{2} = \sinh(x)$.'
-    
-    WHEN 'Find the derivative of $g(t) = t^3 e^t$ at $t=1$.' THEN 
-        'Use product rule: $g''(t) = 3t^2 e^t + t^3 e^t = e^t(t^3 + 3t^2)$. At $t=1$: $g''(1) = e(1 + 3) = 4e$.'
-    
-    WHEN 'The function $f(x)=x^3-6x^2+5$ is decreasing on which interval?' THEN 
-        'Find where $f''(x)=3x^2-12x < 0$: $3x(x-4) < 0 \Rightarrow 0 < x < 4$.'
-    
-    WHEN 'If $f(x) = g(h(x))$, $h(1)=2$, $h''(1)=3$, $g''(2)=4$, find $f''(1)$.' THEN 
-        'By chain rule: $f''(1) = g''(h(1)) \cdot h''(1) = g''(2) \cdot 3 = 4 \cdot 3 = 12$. [Note: The question asks for $f''(1)$ but provides $h''(1)$ and $g''(2)$ - this assumes second derivatives are given]'
-    
-    WHEN 'Find the derivative of $f(x) = \sqrt{x^2+1}$.' THEN 
-        'Rewrite as $(x^2+1)^{1/2}$ and use chain rule: $f''(x) = \frac{1}{2}(x^2+1)^{-1/2} \cdot 2x = \frac{x}{\sqrt{x^2+1}}$.'
-        -- Category: Integration (continued)
-    WHEN 'Find the volume of the solid generated by revolving the region bounded by $y=\sqrt{x}$, $x=1$, $x=4$ and the x-axis about the x-axis.' THEN 
-        'Use the disk method: $V = \pi\int_1^4 (\sqrt{x})^2 dx = \pi\int_1^4 x dx = \pi[\frac{1}{2}x^2]_1^4 = \pi(\frac{16}{2}-\frac{1}{2}) = \frac{15\pi}{2}$.'
 
-    WHEN 'Evaluate $\int_0^{\pi/2} \sin^3(x)\cos(x) dx$.' THEN 
-        'Use substitution: $u=\sin(x)$, $du=\cos(x)dx$. When $x=0$, $u=0$; when $x=\pi/2$, $u=1$. The integral becomes $\int_0^1 u^3 du = [\frac{1}{4}u^4]_0^1 = \frac{1}{4}$.'
-
-    WHEN 'What is the average value of $f(x)=\sin(x)$ on the interval $[0, \pi]$?' THEN 
-        'Average value = $\frac{1}{\pi-0}\int_0^\pi \sin(x) dx = \frac{1}{\pi}[-\cos(x)]_0^\pi = \frac{1}{\pi}(-(-1) - (-1)) = \frac{2}{\pi}$.'
-
-    WHEN 'Use integration by parts to evaluate $\int x e^x dx$.' THEN 
-        'Let $u=x$, $dv=e^x dx$; then $du=dx$, $v=e^x$. The formula $\int u dv = uv - \int v du$ gives $xe^x - \int e^x dx = xe^x - e^x + C = e^x(x-1) + C$.'
-
-    WHEN 'Find the length of the curve $y = \frac{2}{3}x^{3/2}$ from $x=0$ to $x=3.'
-    THEN 'The arc length formula is $L = \int_a^b \sqrt{1+(y'')^2}dx$. First, find the derivative: $y'' = \frac{d}{dx}(\frac{2}{3}x^{3/2}) = x^{1/2}$. Now, plug this into the formula: $L=\int_0^3 \sqrt{1+(x^{1/2})^2}dx = \int_0^3 \sqrt{1+x}dx$. Use u-substitution with $u=1+x$, so $du=dx$. The integral becomes $\int_1^4 u^{1/2}du = [\frac{2}{3}u^{3/2}]_1^4 = \frac{2}{3}(4^{3/2} - 1^{3/2}) = \frac{2}{3}(8-1) = 14/3$.'
-
-    WHEN 'Evaluate the improper integral $\int_1^\infty \frac{1}{x^2} dx$.' THEN 
-        'Rewrite as $\lim_{b\to\infty}\int_1^b x^{-2} dx = \lim_{b\to\infty} [-\frac{1}{x}]_1^b = \lim_{b\to\infty} (-\frac{1}{b} + 1) = 1$.'
-
-    WHEN 'The area of the region enclosed by the graphs of $y=x^2$ and $y=x$ is' THEN 
-        'Find intersection points: $x^2=x \Rightarrow x=0,1$. Area = $\int_0^1 (x - x^2) dx = [\frac{1}{2}x^2 - \frac{1}{3}x^3]_0^1 = \frac{1}{2} - \frac{1}{3} = \frac{1}{6}$.'
-
-    WHEN 'Evaluate $\int \tan(x) dx$.' THEN 
-        'Rewrite $\tan(x) = \frac{\sin(x)}{\cos(x)}$. Use substitution: $u=\cos(x)$, $du=-\sin(x)dx$. The integral becomes $-\int \frac{du}{u} = -\ln|u| + C = -\ln|\cos(x)| + C = \ln|\sec(x)| + C$.'
-
-    WHEN 'Find the volume of the solid obtained by rotating the region under the curve $y=1/x$ from $x=1$ to $x=2$ about the y-axis (Shell Method).' THEN 
-        'Shell method formula: $V = 2\pi\int_1^2 x\cdot\frac{1}{x} dx = 2\pi\int_1^2 1 dx = 2\pi(2-1) = 2\pi$.'
-
-    WHEN 'Evaluate $\int \frac{1}{x^2+4} dx$.' THEN 
-        'Use standard integral form: $\int \frac{1}{u^2+a^2} du = \frac{1}{a}\arctan(\frac{u}{a}) + C$. Here $a=2$, so $\frac{1}{2}\arctan(\frac{x}{2}) + C$.'
-
-    WHEN 'What does the Fundamental Theorem of Calculus Part 1 state?' THEN 
-        'FTC Part 1 states that if $g(x) = \int_a^x f(t) dt$, then $g''(x) = f(x)$. This connects differentiation and integration.'
-
-    WHEN 'Use partial fractions to evaluate $\int \frac{1}{x(x-1)} dx$.' THEN 
-        'Decompose $\frac{1}{x(x-1)} = \frac{A}{x} + \frac{B}{x-1} = \frac{1}{x-1} - \frac{1}{x}$. The integral becomes $\ln|x-1| - \ln|x| + C = \ln|\frac{x-1}{x}| + C$.'
-
-    WHEN 'The integral $\int_0^2 \sqrt{4-x^2} dx$ represents the area of...' THEN 
-        'This is the upper half of a circle with radius 2 (since $y=\sqrt{4-x^2} \Rightarrow x^2+y^2=4$). The limits from 0 to 2 give a quarter-circle.'
-
-    WHEN 'Evaluate $\int \sec^3(x) dx$.' THEN 
-        'This requires integration by parts and is a standard result: $\frac{1}{2}(\sec x \tan x + \ln|\sec x + \tan x|) + C$. Memorization of this form is recommended.'
-
-    WHEN 'Evaluate $\int_0^1 \frac{x}{x^2+1} dx$.' THEN 
-        'Use substitution: $u=x^2+1$, $du=2x dx$. The integral becomes $\frac{1}{2}\int_1^2 \frac{du}{u} = \frac{1}{2}[\ln|u|]_1^2 = \frac{1}{2}\ln(2)$.'
-
-    WHEN 'Find the area between the curves $y=\sin(x)$ and $y=\cos(x)$ from $x=0$ to $x=\pi/4$.' THEN 
-        'In this interval, $\cos(x) > \sin(x)$. Area = $\int_0^{\pi/4} (\cos(x) - \sin(x)) dx = [\sin(x) + \cos(x)]_0^{\pi/4} = (\frac{\sqrt{2}}{2} + \frac{\sqrt{2}}{2}) - (0 + 1) = \sqrt{2} - 1$.'
-
-    WHEN '$\int_1^e \frac{1}{x} dx$ is...' THEN 
-        'This evaluates to $[\ln|x|]_1^e = \ln(e) - \ln(1) = 1 - 0 = 1$.'
-
-    WHEN 'Use trigonometric substitution to evaluate $\int \frac{dx}{\sqrt{1-x^2}}$.' THEN 
-        'This is a standard integral: $\arcsin(x) + C$. Alternatively, use substitution $x=\sin(\theta)$ to derive this result.'
-
-    WHEN 'The surface area of the solid obtained by rotating $y=x^3$ on $[0,1]$ about the x-axis is given by which integral?'
-    THEN 'Surface area formula: $2\pi\int_a^b y\sqrt{1+(y'''')^2} dx$. Here $y''''=3x^2$, so the integral is $2\pi\int_0^1 x^3 \sqrt{1+9x^4} dx$.'
-
-    WHEN 'Evaluate $\int_0^{\pi} \cos^2(x) dx$.' THEN 
-        'Use identity $\cos^2(x) = \frac{1+\cos(2x)}{2}$. The integral becomes $\frac{1}{2}\int_0^\pi (1 + \cos(2x)) dx = \frac{1}{2}[x + \frac{1}{2}\sin(2x)]_0^\pi = \frac{\pi}{2}$.'
-
-    WHEN 'If $\int_2^5 f(x)dx = 10$ and $\int_2^5 g(x)dx = -3$, what is $\int_2^5 [2f(x) - 3g(x)]dx$?' THEN 
-        'Use linearity of integrals: $2\int f(x)dx - 3\int g(x)dx = 2(10) - 3(-3) = 20 + 9 = 29$.'
-
-    WHEN 'Which integration technique would be best for $\int \frac{3x-5}{x^2-2x-3} dx$?' THEN 
-        'The denominator factors as $(x-3)(x+1)$, suggesting partial fractions is the most appropriate method.'
-
-    WHEN 'The volume of a solid with a known cross-sectional area $A(x)$ from $x=a$ to $x=b$ is' THEN 
-        'Volume with known cross-sections is $\int_a^b A(x) dx$. This is the general formula for volumes by slicing.'
-
-    WHEN 'Evaluate $\int_0^4 |x-2| dx$.' THEN 
-        'Split at x=2: $\int_0^2 (2-x) dx + \int_2^4 (x-2) dx = [2x-\frac{1}{2}x^2]_0^2 + [\frac{1}{2}x^2-2x]_2^4 = (4-2) + (8-8 - (2-4)) = 2 + 2 = 4$.'
-
-    WHEN '$\int \sin^2(x) dx = $' THEN 
-        'Use identity $\sin^2(x) = \frac{1-\cos(2x)}{2}$. The integral becomes $\frac{1}{2}x - \frac{1}{4}\sin(2x) + C$.'
-
-    WHEN 'Find $\int x^2\ln(x)dx$.' THEN 
-        'Use integration by parts: $u=\ln(x)$, $dv=x^2 dx$; $du=\frac{1}{x}dx$, $v=\frac{1}{3}x^3$. The integral becomes $\frac{1}{3}x^3\ln(x) - \int \frac{1}{3}x^2 dx = \frac{1}{3}x^3\ln(x) - \frac{1}{9}x^3 + C$.'
-
-    WHEN 'The area of one petal of the rose curve $r = \sin(3\theta)$ is' THEN 
-        'One petal corresponds to $\theta$ from 0 to $\pi/3$. Area = $\frac{1}{2}\int_0^{\pi/3} \sin^2(3\theta) d\theta = \frac{1}{2}[\frac{\theta}{2} - \frac{\sin(6\theta)}{12}]_0^{\pi/3} = \frac{\pi}{12}$.'
-
-    -- Category: Applications (10 Questions)
-    WHEN 'A company''s profit from selling x units of a product is $P(x) = -0.1x^2 + 50x - 1000$. How many units should be sold to maximize profit?' THEN 
-        'Find vertex of parabola: $x = -b/(2a) = -50/(2(-0.1)) = 250$. Verify maximum: $P''(x) = -0.2 < 0$. Thus 250 units maximizes profit.'
-
-    WHEN 'Water is leaking from a conical tank at a rate of 2 ft³/min. The tank has a height of 16 ft and a base radius of 4 ft. How fast is the water level falling when the water is 8 ft deep?' THEN 
-        'Use similar triangles: $r/h = 4/16 \Rightarrow r = h/4$. Volume $V = \frac{1}{3}\pi r^2 h = \frac{\pi}{48}h^3$. Differentiate: $\frac{dV}{dt} = \frac{\pi}{16}h^2 \frac{dh}{dt}$. At $h=8$, $-2 = \frac{\pi}{16}(64)\frac{dh}{dt} \Rightarrow \frac{dh}{dt} = -\frac{1}{2\pi}$ ft/min.'
-
-    WHEN 'A population of bacteria grows according to the equation $P(t) = P_0 e^{kt}$. If the population doubles in 5 hours, what is the value of $k$?' THEN 
-        'Set $2P_0 = P_0 e^{5k} \Rightarrow 2 = e^{5k} \Rightarrow k = \frac{\ln 2}{5}$ per hour.'
-
-    WHEN 'The work done in stretching a spring from its natural length of 10 cm to 15 cm is 2 J. What is the spring constant $k$ (in N/m)?' THEN 
-        'Work = $\frac{1}{2}k x^2$ where $x=0.05$ m (5 cm stretch). $2 = \frac{1}{2}k(0.05)^2 \Rightarrow k = 2/(0.00125) = 1600$ N/m.'
-
-    WHEN 'A particle''s velocity is $v(t) = 3t^2 - 12$. Find the total distance traveled from $t=0$ to $t=3$.' THEN 
-        'First find when $v(t)=0$: $3t^2-12=0 \Rightarrow t=2$ (in interval). Distance = $\int_0^2 |v(t)| dt + \int_2^3 |v(t)| dt = \int_0^2 (12-3t^2) dt + \int_2^3 (3t^2-12) dt = [12t-t^3]_0^2 + [t^3-12t]_2^3 = (24-8) + (27-36 - (8-24)) = 16 + (-9 - (-16)) = 23$ m.'
-
-    WHEN 'According to Newton''s Law of Cooling, the rate of cooling of an object is proportional to the difference between its temperature and the ambient temperature. This is modeled by which differential equation?' THEN 
-        'The correct model is $\frac{dT}{dt} = k(T - T_s)$ where $T_s$ is ambient temperature. The rate is proportional to (object temp - ambient temp).'
-
-    WHEN 'If the marginal cost to produce x items is $C''(x) = 3x^2 - 4x + 5$, find the cost function $C(x)$ given that the fixed cost is $C(0)=\$10$.' THEN 
-        'Integrate marginal cost: $C(x) = \int (3x^2 - 4x + 5) dx = x^3 - 2x^2 + 5x + K$. Use $C(0)=10$ to find $K=10$. Thus $C(x) = x^3 - 2x^2 + 5x + 10$.'
-
-    WHEN 'The half-life of Carbon-14 is approximately 5730 years. What is the decay rate $k$?' THEN 
-        'From $A(t) = A_0 e^{kt}$, half-life gives $\frac{1}{2} = e^{5730k} \Rightarrow k = \frac{\ln(1/2)}{5730} = -\frac{\ln 2}{5730}$ per year.'
-
-    WHEN 'A cylindrical can is to be made to hold 1 L of oil. Find the dimensions that will minimize the cost of the metal to manufacture the can (minimize surface area).' THEN 
-        'Volume constraint: $\pi r^2 h = 1000$ cm³. Surface area $S = 2\pi r^2 + 2\pi r h$. Express $h$ in terms of $r$ and minimize $S(r) = 2\pi r^2 + \frac{2000}{r}$. Derivative $S''(r) = 4\pi r - \frac{2000}{r^2} = 0 \Rightarrow r = \sqrt[3]{\frac{500}{\pi}}$ cm, then $h = \frac{1000}{\pi r^2} = 2r$.'
-
-    WHEN 'Find the logistic growth model given by $\frac{dy}{dt} = ky(1 - \frac{y}{L})$ where L is the carrying capacity.' THEN 
-        'The solution to the logistic differential equation is $y(t) = \frac{L}{1 + Ae^{-kt}}$ where $A$ is determined by initial conditions. This is the standard logistic growth model.'
-
-
-
-    WHEN 'The Product rule of differentiation formula for the function \( V = r(x)s(x) \) is...' THEN 
-        'The product rule states that for two differentiable functions r(x) and s(x), the derivative of their product V = r(x)s(x) is given by:
-        \[ \frac{dV}{dx} = r(x)\frac{ds}{dx} + s(x)\frac{dr}{dx} \]
-        This matches option D exactly, showing the correct application of the product rule.'
-
-    -- Question 5 from Group B-3.pdf (Limits)
-    WHEN '\(\lim_{x \to 3} \frac{x^5 - 243}{x^8 - 27} \text{ equal}\)' THEN 
-        'Solution steps:
-        1. Factor numerator as difference of powers: \(x^5 - 243 = (x-3)(x^4 + 3x^3 + 9x^2 + 27x + 81)\)
-        2. Factor denominator: \(x^8 - 27 = (x-3)(x^7 + 3x^6 + 9x^5 + 27x^4 + 81x^3 + 243x^2 + 729x + 2187)\)
-        3. Cancel the (x-3) term
-        4. Direct substitution gives \(\frac{243+243+243+243+81}{2187+2187+2187+2187+729+729+2187+6561} = \frac{15}{1} = 15\)'
-
-    -- Question 6 from Group B-3.pdf (Function Composition)
-    WHEN 'Given the functions \( f(x) = 3x^2 - 5 \), \( g(x) = 5x - 1 \) evaluate \( f(g(x)) \)' THEN 
-        'Composition solution:
-        1. Substitute g(x) into f: \(f(g(x)) = f(5x-1)\)
-        2. Apply f to input: \(3(5x-1)^2 - 5\)
-        3. Expand: \(3(25x^2 - 10x + 1) - 5\)
-        4. Simplify: \(75x^2 - 30x + 3 - 5 = 75x^2 - 30x - 2\)'
-
-    -- Question 7 from Group B-3.pdf (Integration)
-    WHEN 'Find \[\int \frac{dx}{4 + 9x^2}\]' THEN 
-        'Integration steps:
-        1. Recognize standard form \(\int \frac{du}{a^2 + u^2} = \frac{1}{a}\tan^{-1}(\frac{u}{a}) + C\)
-        2. Identify a=2 and u=3x (so du=3dx)
-        3. Adjust for coefficient: \(\frac{1}{6}\tan^{-1}(\frac{3x}{2}) + C\)
-        4. This matches option B exactly'
-
-    -- Question 8 from Group B-3.pdf (Differentiation)
-    WHEN 'Given that \( y = \frac{x}{2x+5} \). Find \(\frac{dy}{dx}\)' THEN 
-        'Quotient rule solution:
-        1. Let numerator u=x (u''=1) and denominator v=2x+5 (v''=2)
-        2. Apply quotient rule: \(\frac{v u'' - u v''}{v^2}\)
-        3. Compute: \(\frac{(2x+5)(1) - x(2)}{(2x+5)^2}\)
-        4. Simplify: \(\frac{5}{(2x+5)^2}\)'
-
-    -- Question 9 from Group B-3.pdf (Integration by Parts)
-    WHEN 'Find \(\int \ln \frac{x}{2} dx\)' THEN 
-        'Integration by parts:
-        1. Let \(u = \ln\frac{x}{2}\) ⇒ \(du = \frac{1}{x}dx\)
-        2. Let dv = dx ⇒ v = x
-        3. Apply formula: \(uv - \int v du\)
-        4. Compute: \(x\ln\frac{x}{2} - \int x \cdot \frac{1}{x} dx\)
-        5. Final result: \(x(\ln\frac{x}{2} - 1) + C\)'
-
-    -- Question 10 from Group B-3.pdf (Series Expansion)
     WHEN 'The nth term of the Maclaurin series expansion of cos 3x is' THEN 
-        'Maclaurin series derivation:
-        1. General cos form: \(\cos z = \sum_{n=0}^\infty \frac{(-1)^n z^{2n}}{(2n)!}\)
-        2. Substitute z=3x: \(\cos 3x = \sum_{n=0}^\infty \frac{(-1)^n (3x)^{2n}}{(2n)!}\)
-        3. Thus nth term: \(\frac{(-1)^n (3x)^{2n}}{(2n)!}\)
-        4. This matches option D exactly'
+        'The general Maclaurin series for $\cos(z)$ is:\n$$\cos z = \sum_{n=0}^\infty \frac{(-1)^n z^{2n}}{(2n)!} = 1 - \frac{z^2}{2!} + \frac{z^4}{4!} - \dots$$\nTo find the series for $\cos(3x)$, we substitute $z=3x$ into the general formula:\n$$\cos(3x) = \sum_{n=0}^\infty \frac{(-1)^n (3x)^{2n}}{(2n)!}$$\nThe nth term of this series is the general expression inside the summation:\n$$\frac{(-1)^n (3x)^{2n}}{(2n)!}$$'
 
-    -- Question 1 from Group B-4.pdf (Product Rule)
     WHEN 'The Product rule of differentiation formula for the function \( V = r(x)s(x) \) is' THEN 
-        'Product rule restatement:
-        The derivative of a product V = r(x)s(x) is:
-        \[ \frac{dV}{dx} = r(x)\frac{ds}{dx} + s(x)\frac{dr}{dx} \]
-        This is identical to the standard product rule formulation in option D'
+        'The product rule is a fundamental formula used to find the derivative of a product of two functions.\nIf a function $V$ is the product of two differentiable functions, $r(x)$ and $s(x)$, its derivative is given by:\n$$ \frac{dV}{dx} = r(x)\frac{ds}{dx} + s(x)\frac{dr}{dx} $$\nThis means "the first function times the derivative of the second, plus the second function times the derivative of the first".'
 
-    -- Question 2 from Group B-4.pdf (Reduction Formula)
     WHEN 'Which of the following option best describes the reduction formula for \( V_n = \int cosec^n x dx, n \geq 2 \)' THEN 
-        'Reduction formula derivation:
-        1. For \(\int \csc^n x dx\), integration by parts gives:
-        2. \(\frac{-1}{n-1}\csc^{n-2}x \cot x + \frac{n-2}{n-1}\int \csc^{n-2}x dx\)
-        3. This matches option A exactly
-        4. The formula reduces the power of cosecant by 2 each application'
-
- 
-    WHEN 'Find \[ \int \left( \frac{\cos x}{\sin^2 x} - 2e^{2x} \right) dx \]' THEN 
-        'Solution:
-        1. Split into two integrals:
-           \[ \int \frac{\cos x}{\sin^2 x} dx - \int 2e^{2x} dx \]
-        2. First integral substitution:
-           Let \( u = \sin x \), \( du = \cos x dx \)
-           \[ \int \frac{du}{u^2} = -\frac{1}{u} = -\csc x + C \]
-        3. Second integral:
-           \[ \int 2e^{2x} dx = e^{2x} + C \]
-        4. Combine results:
-           \[ -\csc x - e^{2x} + C \]'
-
-    -- Question 2 from Group B(1).pdf (Integration)
-    WHEN 'Obtain \(\int \sin^2 x \, dx\)' THEN 
-        'Solution:
-        1. Use power-reduction identity:
-           \[ \sin^2 x = \frac{1 - \cos 2x}{2} \]
-        2. Rewrite integral:
-           \[ \int \frac{1 - \cos 2x}{2} dx = \frac{1}{2}x - \frac{1}{4}\sin 2x + C \]
-        3. This matches option D:
-           \[ \frac{1}{2}x - \frac{\sin 2x}{4} + C \]'
-
-    -- Question 3 from Group B(1).pdf (Differentiation)
-    WHEN 'Given that \( y = \frac{x}{2x+5} \). Find \( \frac{dy}{dx} \)' THEN
-        'Solution:
-        1. Apply quotient rule:
-           \[ \frac{dy}{dx} = \frac{(2x+5)(1) - x(2)}{(2x+5)^2} \]
-        2. Simplify numerator:
-           \[ 2x + 5 - 2x = 5 \]
-        3. Final result:
-           \[ \frac{5}{(2x+5)^2} \]'
-
-    -- Question 4 from Group B(1).pdf (Differentiation)
-    WHEN 'The Product rule of differentiation formula for the function \( V = r(x)s(x) \, \text{is...} \)' THEN
-        'Solution:
-        1. The product rule states:
-           \[ \frac{d}{dx}[r(x)s(x)] = r(x)\frac{ds}{dx} + s(x)\frac{dr}{dx} \]
-        2. In terms of V:
-           \[ \frac{dV}{dx} = r\frac{ds}{dx} + s\frac{dr}{dx} \]
-        3. This matches option D exactly'
-
-    -- Question 5 from Group B(1).pdf (Functions)
-    WHEN 'Given the function \( f(x-5) = 3x^2 - x + 1 \), evaluate \( f(x) \)' THEN
-        'Solution:
-        1. Let \( y = x - 5 \), so \( x = y + 5 \)
-        2. Substitute:
-           \[ f(y) = 3(y+5)^2 - (y+5) + 1 \]
-        3. Expand:
-           \[ 3(y^2 + 10y + 25) - y - 5 + 1 \]
-        4. Simplify:
-           \[ 3y^2 + 30y + 75 - y - 4 = 3y^2 + 29y + 71 \]
-        5. Replace y with x:
-           \[ f(x) = 3x^2 + 29x + 71 \]'
-
-    -- Question 6 from Group B(1).pdf (Differentiation)
-    WHEN 'Find \(\frac{dy}{dx}\) of \(y = \frac{cosec x}{cot x}\)' THEN
-        'Solution:
-        1. Simplify using trig identities:
-           \[ y = \frac{1/\sin x}{\cos x/\sin x} = \frac{1}{\cos x} = \sec x \]
-        2. Differentiate:
-           \[ \frac{dy}{dx} = \sec x \tan x \]
-        3. None of the options match, correct answer is D (none)'
-
-    -- Question 7 from Group B(1).pdf (Integration)
-    WHEN 'Which of the following option best describes the reduction formula for  
-        \[V_n = \int cosec^n x \, dx, \quad n \geq 2.\]' THEN
-        'Solution:
-        1. The standard reduction formula is:
-           \[ \int \csc^n x dx = -\frac{\csc^{n-2}x \cot x}{n-1} + \frac{n-2}{n-1}\int \csc^{n-2}x dx \]
-        2. This matches option A exactly'
-
-    -- Question 8 from Group B(1).pdf (Differentiation)
-    WHEN '\(\frac{d}{dx} (3x^2 \cos^{-1}x) = ...\)' THEN
-        'Solution:
-        1. Apply product rule:
-           \[ \frac{d}{dx}[3x^2 \cos^{-1}x] = 6x \cos^{-1}x + 3x^2 \left(-\frac{1}{\sqrt{1-x^2}}\right) \]
-        2. Simplify:
-           \[ 6x \cos^{-1}x - \frac{3x^2}{\sqrt{1-x^2}} \]
-        3. This matches option A exactly'
-
-    -- Question 9 from Group B(1).pdf (Limits)
-    WHEN '\(\lim_{x \to 3} \frac{x^5 - 243}{x^8 - 27} \text{ equal}\)' THEN
-        'Solution:
-        1. Factor numerator and denominator:
-           \[ x^5 - 243 = (x-3)(x^4 + 3x^3 + 9x^2 + 27x + 81) \]
-           \[ x^8 - 27 = (x-3)(x^7 + 3x^6 + 9x^5 + 27x^4 + 81x^3 + 243x^2 + 729x + 2187) \]
-        2. Cancel (x-3) terms
-        3. Substitute x=3:
-           \[ \frac{243+243+243+243+81}{2187+2187+2187+2187+729+729+2187+6561} = \frac{15}{1} = 15 \]'
-
-    -- Question 10 from Group B(1).pdf (Integration)
-    WHEN 'Find \[ \int \ln \frac{x}{2} \, dx \]' THEN
-        'Solution:
-        1. Use integration by parts:
-           Let \( u = \ln\frac{x}{2} \), \( dv = dx \)
-           \( du = \frac{1}{x}dx \), \( v = x \)
-        2. Apply formula:
-           \[ x\ln\frac{x}{2} - \int x \cdot \frac{1}{x} dx \]
-        3. Simplify:
-           \[ x\ln\frac{x}{2} - x + C = x(\ln\frac{x}{2} - 1) + C \]'
-
-    -- Question 1 from Group B-1.pdf (Differentiation)
-    WHEN 'Given that \( y = \frac{x}{2x+5} \). Find \(\frac{dy}{dx}\)' THEN 
-        'Solution:
-        1. Apply quotient rule: \(\frac{d}{dx}\left(\frac{u}{v}\right) = \frac{v\frac{du}{dx} - u\frac{dv}{dx}}{v^2}\)
-        2. Let \(u = x\), \(v = 2x+5\)
-        3. Compute derivatives: \(\frac{du}{dx} = 1\), \(\frac{dv}{dx} = 2\)
-        4. Substitute: \(\frac{(2x+5)(1) - x(2)}{(2x+5)^2}\)
-        5. Simplify: \(\frac{5}{(2x+5)^2}\)'
-
-    -- Question 2 from Group B-1.pdf (Integration)
-    WHEN 'Find \[ \int \frac{dx}{4 + 9x^2} \]' THEN 
-        'Solution:
-        1. Recognize standard form: \(\int \frac{du}{a^2 + u^2} = \frac{1}{a}\tan^{-1}\left(\frac{u}{a}\right) + C\)
-        2. Identify: \(a^2 = 4 \Rightarrow a = 2\), \(u^2 = 9x^2 \Rightarrow u = 3x\)
-        3. Adjust for coefficient: \(du = 3dx \Rightarrow dx = \frac{du}{3}\)
-        4. Compute: \(\frac{1}{3} \cdot \frac{1}{2}\tan^{-1}\left(\frac{3x}{2}\right) + C = \frac{1}{6}\tan^{-1}\left(\frac{3x}{2}\right) + C\)'
-
-    -- Question 3 from Group B-1.pdf (Differentiation)
-    WHEN '\(\frac{d}{dx} (cosec^{-1}(5x)) = ...\)' THEN 
-        'Solution:
-        1. Derivative formula: \(\frac{d}{dx}cosec^{-1}(u) = -\frac{1}{|u|\sqrt{u^2-1}}\cdot\frac{du}{dx}\)
-        2. Let \(u = 5x\), \(\frac{du}{dx} = 5\)
-        3. Substitute: \(-\frac{5}{|5x|\sqrt{25x^2-1}}\)
-        4. Simplify: \(-\frac{5}{x\sqrt{25x^2-1}}\) (since \(x > 0\))'
-
-    -- Question 4 from Group B-1.pdf (Differentiation)
-    WHEN '\(\frac{d}{dx} (3x^2 cos^{-1}x) = ...\)' THEN 
-        'Solution:
-        1. Apply product rule: \(\frac{d}{dx}[uv] = u''v + uv''\)
-        2. Let \(u = 3x^2\), \(v = cos^{-1}x\)
-        3. Compute derivatives: \(u'' = 6x\), \(v'' = -\frac{1}{\sqrt{1-x^2}}\)
-        4. Combine: \(6x cos^{-1}x - \frac{3x^2}{\sqrt{1-x^2}}\)'
-
-    -- Question 5 from Group B-1.pdf (Functions)
-    WHEN 'Given the function \( f(x-5) = 3x^2 - x + 1 \), evaluate \( f(x) \)' THEN 
-        'Solution:
-        1. Let \(y = x-5\), so \(x = y+5\)
-        2. Substitute: \(f(y) = 3(y+5)^2 - (y+5) + 1\)
-        3. Expand: \(3(y^2 + 10y + 25) - y - 5 + 1\)
-        4. Simplify: \(3y^2 + 30y + 75 - y - 4 = 3y^2 + 29y + 71\)
-        5. Replace y with x: \(f(x) = 3x^2 + 29x + 71\)'
-
-    -- Question 6 from Group B-1.pdf (Integration)
-    WHEN 'Find \[\int \left( \frac{\cos x}{\sin^2 x} - 2e^{2x} \right) dx\]' THEN 
-        'Solution:
-        1. Split integral: \(\int \frac{\cos x}{\sin^2 x} dx - \int 2e^{2x} dx\)
-        2. First part: Let \(u = \sin x\), \(du = \cos x dx\)
-           \(\int \frac{du}{u^2} = -\frac{1}{u} = -\csc x + C\)
-        3. Second part: \(\int 2e^{2x} dx = e^{2x} + C\)
-        4. Combine: \(-\csc x - e^{2x} + C\)'
-
-    -- Question 7 from Group B-1.pdf (Integration)
-    WHEN 'Find \[\int \ln \frac{x}{2} dx\]' THEN 
-        'Solution:
-        1. Integration by parts: \(\int u dv = uv - \int v du\)
-        2. Let \(u = \ln\frac{x}{2}\), \(dv = dx\)
-        3. Then \(du = \frac{1}{x}dx\), \(v = x\)
-        4. Apply: \(x\ln\frac{x}{2} - \int x \cdot \frac{1}{x} dx\)
-        5. Simplify: \(x(\ln\frac{x}{2} - 1) + C\)'
-
-    -- Question 8 from Group B-1.pdf (Definite Integral)
-    WHEN 'Given that a is a positive constant, evaluate \[ \int_{a}^{2a} \left( \frac{2x+1}{x} \right) dx \]' THEN 
-        'Solution:
-        1. Simplify integrand: \(\frac{2x+1}{x} = 2 + \frac{1}{x}\)
-        2. Integrate: \(\int 2 dx + \int \frac{1}{x} dx = 2x + \ln|x|\)
-        3. Evaluate bounds: \([4a + \ln(2a)] - [2a + \ln a]\)
-        4. Simplify: \(2a + \ln 2 = a + \ln 4\)'
-
-    -- Question 9 from Group B-1.pdf (Integration)
-    WHEN 'Integrate \[ \int \sec^2 x \tan x dx \]' THEN 
-        'Solution:
-        1. Use substitution: Let \(u = \tan x\), \(du = \sec^2 x dx\)
-        2. Rewrite integral: \(\int u du = \frac{1}{2}u^2 + C\)
-        3. Substitute back: \(\frac{1}{2}\tan^2 x + C\)
-        4. Equivalent form: \(\frac{1}{2}\sec^2 x + C'' (since \(\tan^2 x = \sec^2 x - 1\))'
-
-    -- Question 10 from Group B-1.pdf (Function Composition)
-    WHEN 'Given the functions \( f(x) = 3x^2 - 5 \), \( g(x) = 5x - 1 \) evaluate \( f(g(x)) \)' THEN 
-        'Solution:
-        1. Compose functions: \(f(g(x)) = f(5x-1)\)
-        2. Substitute: \(3(5x-1)^2 - 5\)
-        3. Expand: \(3(25x^2 - 10x + 1) - 5\)
-        4. Simplify: \(75x^2 - 30x + 3 - 5 = 75x^2 - 30x - 2\)'
-
-
-
-    ELSE 'This problem tests a core concept in calculus. Review the relevant theorems and definitions to understand the solution.'
-  END;
-DROP TABLE IF EXISTS public.answer_explanations;
+        'This is a standard reduction formula derived using integration by parts, which allows us to solve integrals of powers of trigonometric functions by reducing the power in each step.\nThe correct formula for the integral of $\csc^n(x)$ is:\n$$V_n = \int \csc^n x dx = -\frac{\csc^{n-2}x \cot x}{n-1} + \frac{n-2}{n-1}\int \csc^{n-2}x dx$$\nIn terms of $V_n$, this is:\n$$V_n = -\frac{1}{n-1}\csc^{n-2}x \cot x + \frac{n-2}{n-1} V_{n-2}$$'
+END;

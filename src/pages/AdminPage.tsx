@@ -173,7 +173,7 @@ const AdminPage: React.FC = () => {
 
   const resetUserQuiz = async (userId: string, username: string) => {
     try {
-      await supabase.from('profiles').update({ has_attempted_quiz: false, quiz_completed_at: null }).eq('id', userId);
+      await supabase.from('profiles').update({ has_attempted_quiz: false, quiz_completed_at: null }).eq('user_id', userId);
       await supabase.from('quiz_attempts').delete().eq('user_id', userId);
       await supabase.from('quiz_violations').delete().eq('user_id', userId);
       toast({ title: "Success", description: `Quiz attempt reset for ${username}.` });

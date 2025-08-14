@@ -134,11 +134,11 @@ const QuizPage: React.FC = () => {
         const { data: profileData, error: profileError } = await supabase.from('profiles').select('has_attempted_quiz, payment_verified').eq('user_id', user.id).single();
         if (profileError) throw profileError;
 
-        if (profileData.has_attempted_quiz) {
-          setHasAttempted(true);
-          setIsLoading(false);
-          return;
-        }
+        // if (profileData.has_attempted_quiz) {
+        //   setHasAttempted(true);
+        //   setIsLoading(false);
+        //   return;
+        // }
 
         if (!profileData.payment_verified) {
           toast({ title: "Payment Required", description: "You must complete payment to take the quiz.", variant: "destructive" });

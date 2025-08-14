@@ -209,7 +209,7 @@ const QuizReviewPage: React.FC = () => {
                   </div>
                    <div className="p-2 bg-muted/50 rounded-lg mt-2"><MathText>{question.question_text}</MathText></div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-4 md:p-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {['A', 'B', 'C', 'D'].map(opt => {
                       const optionKey = `option_${opt.toLowerCase() as 'a' | 'b' | 'c' | 'd'}`;

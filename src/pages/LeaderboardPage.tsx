@@ -28,8 +28,6 @@ const LeaderboardPage: React.FC = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        // Show leaderboard immediately - no date restrictions
-
         const { data, error } = await supabase
           .from('quiz_attempts')
           .select(`
@@ -47,7 +45,6 @@ const LeaderboardPage: React.FC = () => {
 
         if (error) throw error;
 
-        // Transform the data to match LeaderboardEntry interface
         const transformedData = data?.map((attempt: any) => ({
           id: attempt.id,
           score: attempt.score,
@@ -126,7 +123,6 @@ const LeaderboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-8">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
             🏆 Top 10 Leaderboard
@@ -138,7 +134,6 @@ const LeaderboardPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Leaderboard */}
         <div className="max-w-4xl mx-auto space-y-4">
           {leaderboard.length === 0 ? (
             <Card className="bg-card/50 backdrop-blur-sm">
@@ -148,8 +143,6 @@ const LeaderboardPage: React.FC = () => {
                   <h3 className="text-xl font-semibold mb-2">No Quiz Attempts Yet</h3>
                   <p className="text-muted-foreground">
                     Be the first to complete the quiz and appear on the leaderboard!
-                    <br />
-                    Your ranking will appear here immediately after completing the quiz.
                   </p>
                 </div>
               </CardContent>
@@ -184,25 +177,21 @@ const LeaderboardPage: React.FC = () => {
                           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                             <div className="flex items-center space-x-1">
                               <Target className="h-4 w-4" />
-                              <span>{entry.score}/{entry.total_questions} ({percentage}%)</span>
+                              <span>{entry.score}/{entry.total_questions}</span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <Clock className="h-4 w-4" />
                               <span>{formatTime(entry.time_taken)}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>{formatDate(entry.submitted_at)}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">
-                          {entry.score}
+                          {percentage}%
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          points
+                          Score
                         </div>
                       </div>
                     </div>
@@ -213,7 +202,6 @@ const LeaderboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Navigation */}
         <div className="text-center mt-8">
           <Button onClick={() => navigate('/')} variant="outline">
             Back to Home
